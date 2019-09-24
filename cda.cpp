@@ -77,9 +77,9 @@ class CDA {
 		 * operator calls it
 		 */
 		int relativeIndex(int index) {
-			
 			if (index<0 || index>this->size-1) {
-				std::string error = "Index " + std::to_string(index) + "is out of range\n";
+				std::cout << "\n\nCustom Error\n"; 
+				std::string error = "Index " + std::to_string(index) + " is out of range\n";
 				throw std::out_of_range(error);
 			}
 			else {
@@ -239,11 +239,11 @@ class CDA {
 			while (pivotIndex!=k) {
 				if (pivotIndex<k) {
 					//go right
-					min = pivotIndex;
+					min = pivotIndex+1;
 				}
 				else {
 					//go left
-					max = pivotIndex;
+					max = pivotIndex-1;
 				}
 				pivotIndex = partition(min, max);
 			}
@@ -251,26 +251,47 @@ class CDA {
 			return this->list[relativeIndex(pivotIndex)];
 		}
 		
+		void quickSort() {
+			int min=0;
+			int max=size-1;
+			quickRecursive(min,max);
+		}
+
+		void quickRecursive(int min, int max) {
+			int mid=partition(min,max);
+			
+			if (mid-1>min) quickRecursive(min,mid-1);
+			if (mid+1<max) quickRecursive(mid+1,max);
+		}
+
 		int partition(int min, int max) {
 			T pivot = this->list[relativeIndex(min)];
 			min++;
 			T swap;
-			int i;
+			int i=min;
 			
-			for (i=min;i<max;) {
+			for (;;) {
 				if (this->list[relativeIndex(i)] <= pivot) {
 					this->list[relativeIndex(i-1)]=this->list[relativeIndex(i)];
 					i++;
+
+					if (i>max) {
+						this->list[relativeIndex(i-1)]=pivot;
+						return i-1;
+					}
 				}
 				else if (this->list[relativeIndex(i)] > pivot) {
 					swap = this->list[relativeIndex(max)];
 					this->list[relativeIndex(max)] = this->list[relativeIndex(i)];
 					this->list[relativeIndex(i)] = swap;
 					max--;
+
+					if (i>max) {
+						list[relativeIndex(i-1)]=pivot;
+						return i-1;
+					}
 				}
 			}
-			this->list[relativeIndex(i-1)]=pivot;
-			return i;
 		}
 
 		/**
@@ -296,6 +317,8 @@ int main(int argc, char const *argv[]) {
 	
 	list.printList();
 	std::cout << list.QuickSelect(1) << std::endl;
+	std::cout << list.QuickSelect(99) << std::endl;
+	std::cout << list.QuickSelect(8) << std::endl;
 	list.printList();
 	return 0;
 }
