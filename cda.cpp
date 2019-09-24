@@ -9,6 +9,7 @@
  * CDA stands for Circular Dynamic Array
  */
 #include <iostream>
+#include <string>
 
 template <class T>
 class CDA {
@@ -78,7 +79,8 @@ class CDA {
 		int relativeIndex(int index) {
 			
 			if (index<0 || index>this->size-1) {
-				throw;
+				std::string error = "Index " + std::to_string(index) + "is out of range\n";
+				throw std::out_of_range(error);
 			}
 			else {
 				return (this->head+index)%this->cap;
@@ -207,37 +209,93 @@ class CDA {
 		}
 
 		/**
+		 * Clears the CDA and starts over from a new CDA
+		 *
+		 */
+		void clear() {
+			delete [] this->list;
+			this->size=0;
+			this->cap=2;
+			this->head=0;
+			this->list=new T[cap];
+		}
+
+		/**
+		 * Returns the kth smallest element
+		 *
+		 * @param k: the order of the element being searched for
+		 * @return: returns the element being searched for
+		 */
+		T QuickSelect(int k) {
+			//select a pivot
+			int pivotIndex=0;
+			//partition
+			int max=size-1;
+			int min=0;
+			
+			pivotIndex = partition(min, max);
+			//count while loop
+
+			while (pivotIndex!=k) {
+				if (pivotIndex<k) {
+					//go right
+					min = pivotIndex;
+				}
+				else {
+					//go left
+					max = pivotIndex;
+				}
+				pivotIndex = partition(min, max);
+			}
+			//partition
+			return this->list[relativeIndex(pivotIndex)];
+		}
+		
+		int partition(int min, int max) {
+			T pivot = this->list[relativeIndex(min)];
+			min++;
+			T swap;
+			int i;
+			
+			for (i=min;i<max;) {
+				if (this->list[relativeIndex(i)] <= pivot) {
+					this->list[relativeIndex(i-1)]=this->list[relativeIndex(i)];
+					i++;
+				}
+				else if (this->list[relativeIndex(i)] > pivot) {
+					swap = this->list[relativeIndex(max)];
+					this->list[relativeIndex(max)] = this->list[relativeIndex(i)];
+					this->list[relativeIndex(i)] = swap;
+					max--;
+				}
+			}
+			this->list[relativeIndex(i-1)]=pivot;
+			return i;
+		}
+
+		/**
 		 * Prints the CDA starting from the head
 		 */
 		void printList() {
 			for (int i=0;i<size;i++) {
-				std::cout << this->list[this->relativeIndex(i)] << std::endl;
+				std::cout << this->list[this->relativeIndex(i)] << ",";
 			}
+			std::cout << std::endl;
 		}
 };
 
 int main(int argc, char const *argv[]) {
-	std::cout << "Hello World!" << std::endl;
+	std::cout << "Hello World!\n" << std::endl;
 	
-	CDA<std::string> list;
+	CDA<int> list;
 	
-	list.addEnd("first");
-	
-	for (int i=0;i<1;i++) {
-		std::cout << list[i] << std::endl;
-	}
-
-	list.addEnd("second");
-	
-	for (int i=0;i<2;i++) {
-		std::cout << list[i] << std::endl;
+	for (int i=0;i<100;i+=2) {
+		list.addEnd(i);
+		list.addFront(i+1);
 	}
 	
-	list.addFront("third");
-
-	for (int i=0;i<3;i++) {
-		std::cout << list[i] << std::endl;
-	}
-	
+	list.printList();
+	std::cout << list.QuickSelect(1) << std::endl;
+	list.printList();
 	return 0;
 }
