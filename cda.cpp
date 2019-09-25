@@ -375,6 +375,14 @@ class CDA {
 			mergeSort(0,size-1);
 		}
 
+		/**
+		 * Sorts the data by the value of the bits and not by using
+		 * the comparision operators on elements
+		 *
+		 * Data may not be sorted the way you want it to be
+		 *
+		 * @param bits: number of bits compared with each pass
+		 */
 		void radixSort(int bits) {
 			int base=pow(2, bits);
 			int comp=base-1;
@@ -386,38 +394,48 @@ class CDA {
 			}
 		}
 
+		/**
+		 * Used by Radix sort
+		 *
+		 * Sorts data by the value of the bits and not by using
+		 * the comparision operators
+		 *
+		 * Data may not be sorted the way you want it to be
+		 *
+		 * @param base: the base being compared
+		 */
 		bool countingSort(int base, int comp, int exp) {
 			bool valid=0;
 			int countArr[base];
-			int indexArr[base];
 			int shift=pow(base, exp);
 
 			for (int i=0;i<base;i++) countArr[i]=0;
 
 			for (int i=0;i<this->size;i++) {
-				int k=(this->list[relativeIndex(i)]/shift)&comp;
 				countArr[(this->list[relativeIndex(i)]/shift)&comp]++;
 				if (valid || this->list[relativeIndex(i)]/shift != 0) valid=1;
 			}
 
-			indexArr[base-1]=this->size-countArr[base-1];
+			countArr[base-1]=this->size-countArr[base-1];
 			for (int i=base-2;i>=0;i--) {
-				indexArr[i]=indexArr[i+1]-countArr[i];
+				countArr[i]=countArr[i+1]-countArr[i];
 			}
 
-			T sorted[this->cap];
+			T* sorted = new T[this->cap];
 			for (int i=0;i<size;i++) {
-				sorted[indexArr[(this->list[relativeIndex(i)]/shift)&comp]]=this->list[relativeIndex(i)];
-				indexArr[(this->list[relativeIndex(i)]/shift)&comp]++;//move ++ up
+				sorted[countArr[(this->list[relativeIndex(i)]/shift)&comp]++]=this->list[relativeIndex(i)];
+				//countArr[(this->list[relativeIndex(i)]/shift)&comp]++;//move ++ up
 			}
 
+			/*
 			for (int i=0;i<this->size;i++) {
 				this->list[relativeIndex(i)]=sorted[i];
 			}
-			/*
+			*/
+
 			delete [] this->list;
 			this->list = sorted;
-			this->head = 0;*/
+			this->head = 0;
 
 			return valid;
 		}
@@ -462,13 +480,58 @@ int main(int argc, char const *argv[]) {
 	std::cout << "Hello World!\n" << std::endl;
 
 	CDA<int> list;
-	int numElements=5;
+	int numElements=6;
 
 	for (int i=0;i<numElements;i+=2) {
 		list.addEnd(i);
 		list.addFront(i+1);
 	}
 
+	list.printList();
+	list.clear();
+	list.printList();
+
+	for (int i=0;i<numElements;i+=2) {
+		list.addEnd(i);
+		list.addFront(i+1);
+	}
+
+	list.printList();
+
+	list.radixSort(2);
+	list.printList();
+
+	/*
+	CDA<double> listD;
+	listD.addFront(.1);
+	listD.addFront(.01);
+	listD.addFront(.001);
+	listD.addFront(.0001);
+	listD.addFront(.2);
+	listD.printList();
+	listD.stableSort();
+	listD.printList();
+	listD.radixSort(4);
+	listD.printList();
+	*/
+
+	/*
+	CDA<std::string> listS;
+	listS.addFront("A Hello");
+	listS.addFront("B This");
+	listS.addFront("C Message");
+	listS.addFront("D Is");
+	listS.addFront("E Backwards");
+	listS.printList();
+	listS.stableSort();
+	listS.printList();
+	listS.radixSort(4);
+	listS.printList();
+	*/
+
+
+
+	/*
 	list.printList();
 	int dex = list.linearSearch(5);
 	std::cout << list.linearSearch(5) << std::endl;
@@ -479,26 +542,30 @@ int main(int argc, char const *argv[]) {
 	int dex2 = list.binarySearch(3);
 	std::cout << list.binarySearch(3) << std::endl;
 	std::cout << list[dex2] << std::endl;
+	*/
 
-	/*
+
 	for (int j=1;j<16;j++) {
+		CDA<int> list2;
 
-		for (int k=10;k<1000000;k=k*10) {
-			CDA<int> list2;
+		for (int k=10;k<10000000;k=k*10) {
 
 			for (int h=0;h<k;h+=2) {
 				list2.addEnd(h);
 				list2.addFront(h+1);
 			}
 
-			list.radixSort(j);
+			list2.radixSort(j);
 
 			for (int i=0;i<k;i++) {
-				if (i!=list[i]) std::cout << "YOU SUCK" << std::endl;
+				if (i!=list2[i]) std::cout << "YOU SUCK" << std::endl;
 			}
+
+			list2.clear();
 		}
 	}
-	*/
+
+
 
 	return 0;
 }
