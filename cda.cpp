@@ -190,6 +190,48 @@ class CDA {
 			}
 		}
 
+		/**
+		 * Used by Radix sort
+		 *
+		 * Sorts data by the value of the bits and not by using
+		 * the comparision operators
+		 *
+		 * Data may not be sorted the way you want it to be
+		 *
+		 * @param base: the base being compared
+		 * @param comp: the number used to compare to get the bits
+		 * @param exp: the number of bits/base already compared
+		 */
+		bool countingSort(int base, int comp, int exp) {
+			bool valid=0;
+			int countArr[base];
+			int shift=pow(base, exp);
+
+			for (int i=0;i<base;i++) countArr[i]=0;
+
+			for (int i=0;i<this->size;i++) {
+				countArr[(this->list[relativeIndex(i)]/shift)&comp]++;
+				if (valid || this->list[relativeIndex(i)]/shift != 0) valid=1;
+			}
+
+			countArr[base-1]=this->size-countArr[base-1];
+			for (int i=base-2;i>=0;i--) {
+				countArr[i]=countArr[i+1]-countArr[i];
+			}
+
+			T* sorted = new T[this->cap];
+			for (int i=0;i<size;i++) {
+				sorted[countArr[(this->list[relativeIndex(i)]/shift)&comp]++]=this->list[relativeIndex(i)];
+			}
+
+			//Make sure everything is deleted?? Possible memory leak
+			delete [] this->list;
+			this->list = sorted;
+			this->head = 0;
+
+			return valid;
+		}
+
 	public:
 		/**
 		 * This constructs the CDA with an initial capacity of 2
@@ -369,7 +411,7 @@ class CDA {
 		}
 
 		/**
-		 * Sorts it
+		 * Sorts the array
 		 */
 		void stableSort() {
 			mergeSort(0,size-1);
@@ -395,51 +437,12 @@ class CDA {
 		}
 
 		/**
-		 * Used by Radix sort
+		 * Performs a linear search for a data value and
+		 * returns its index relative to the head
 		 *
-		 * Sorts data by the value of the bits and not by using
-		 * the comparision operators
-		 *
-		 * Data may not be sorted the way you want it to be
-		 *
-		 * @param base: the base being compared
+		 * @param value: the data value being searched for
+		 * @returns: returns the index of the value.
 		 */
-		bool countingSort(int base, int comp, int exp) {
-			bool valid=0;
-			int countArr[base];
-			int shift=pow(base, exp);
-
-			for (int i=0;i<base;i++) countArr[i]=0;
-
-			for (int i=0;i<this->size;i++) {
-				countArr[(this->list[relativeIndex(i)]/shift)&comp]++;
-				if (valid || this->list[relativeIndex(i)]/shift != 0) valid=1;
-			}
-
-			countArr[base-1]=this->size-countArr[base-1];
-			for (int i=base-2;i>=0;i--) {
-				countArr[i]=countArr[i+1]-countArr[i];
-			}
-
-			T* sorted = new T[this->cap];
-			for (int i=0;i<size;i++) {
-				sorted[countArr[(this->list[relativeIndex(i)]/shift)&comp]++]=this->list[relativeIndex(i)];
-				//countArr[(this->list[relativeIndex(i)]/shift)&comp]++;//move ++ up
-			}
-
-			/*
-			for (int i=0;i<this->size;i++) {
-				this->list[relativeIndex(i)]=sorted[i];
-			}
-			*/
-
-			delete [] this->list;
-			this->list = sorted;
-			this->head = 0;
-
-			return valid;
-		}
-
 		int linearSearch(T value) {
 			for (int i=0;i<this->size;i++) {
 				if (value == this->list[relativeIndex(i)]) return i;
@@ -447,6 +450,17 @@ class CDA {
 			return -1;
 		}
 
+		/**
+		 * This search algorithm assumes the CDA is already
+		 * sorted! Make sure to call a sort before using this
+		 * search method, or use another search function.
+		 *
+		 * Performs a search for a specified value in the CDA
+		 * and returns its relative index
+		 *
+		 * @param value: the data value being searched for
+		 * @returns: returns the index of the value
+		 */
 		int binarySearch(T value) {
 			int min=0;
 			int max=this->size-1;
