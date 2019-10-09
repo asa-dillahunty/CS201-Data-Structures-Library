@@ -1,5 +1,5 @@
 /**
- * Author: Asa Dillahunty
+ * @Author Asa Dillahunty
  *
  * CS201 Programming Project
  *
@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#define DUMP(X) std::cout << "size is : " << X.length() << std::endl << "capacity is : " << X.capacity() << std::endl; for (int i=0; i< X.length();i++) std::cout << X[i] << " ";  std::cout << std::endl << std::endl;
 
 template <class T>
 class CDA {
@@ -232,6 +233,90 @@ class CDA {
 			return valid;
 		}
 
+		/**
+		 * Used by Radix sort
+		 *
+		 * Sorts data by the value of the bits and not by using
+		 * the comparision operators
+		 *
+		 * Data may not be sorted the way you want it to be
+		 *
+		 * @param base: the base being compared
+		 * @param comp: the number used to compare to get the bits
+		 * @param exp: the number of bits/base already compared
+		 */
+		bool countingSortCast(int base, int comp, int exp) {
+			bool valid=0;
+			int countArr[base];
+			int shift=pow(base, exp);
+
+			for (int i=0;i<base;i++) countArr[i]=0;
+
+			for (int i=0;i<this->size;i++) {
+				countArr[(((int) this->list[relativeIndex(i)])/shift)&comp]++;
+				if (valid || ((int) this->list[relativeIndex(i)])/shift != 0) valid=1;
+			}
+
+			countArr[base-1]=this->size-countArr[base-1];
+			for (int i=base-2;i>=0;i--) {
+				countArr[i]=countArr[i+1]-countArr[i];
+			}
+
+			T* sorted = new T[this->cap];
+			for (int i=0;i<size;i++) {
+				sorted[countArr[(((int) this->list[relativeIndex(i)])/shift)&comp]++]=this->list[relativeIndex(i)];
+			}
+
+			//Make sure everything is deleted?? Possible memory leak
+			delete [] this->list;
+			this->list = sorted;
+			this->head = 0;
+
+			return valid;
+		}
+
+        /**
+         * Used by Radix sort
+         *
+         * Sorts data by the value of the bits and not by using
+         * the comparision operators
+         *
+         * Data may not be sorted the way you want it to be
+         *
+         * @param base: the base being compared
+         * @param comp: the number used to compare to get the bits
+         * @param exp: the number of bits/base already compared
+         */
+        bool countingSortCastPointer(int base, int comp, int exp) {
+            bool valid=0;
+            int countArr[base];
+            int shift=pow(base, exp);
+
+            for (int i=0;i<base;i++) countArr[i]=0;
+
+            for (int i=0;i<this->size;i++) {
+                countArr[(((int) &this->list[relativeIndex(i)])/shift)&comp]++;
+                if (valid || ((int) &this->list[relativeIndex(i)])/shift != 0) valid=1;
+            }
+
+            countArr[base-1]=this->size-countArr[base-1];
+            for (int i=base-2;i>=0;i--) {
+                countArr[i]=countArr[i+1]-countArr[i];
+            }
+
+            T* sorted = new T[this->cap];
+            for (int i=0;i<size;i++) {
+                sorted[countArr[(((int) &this->list[relativeIndex(i)])/shift)&comp]++]=this->list[relativeIndex(i)];
+            }
+
+            //Make sure everything is deleted?? Possible memory leak
+            delete [] this->list;
+            this->list = sorted;
+            this->head = 0;
+
+            return valid;
+        }
+
 	public:
 		/**
 		 * This constructs the CDA with an initial capacity of 2
@@ -249,7 +334,7 @@ class CDA {
 		 * @param s: the given initial capacity
 		 */
 		CDA(int s) {
-			this->size=0;
+			this->size=s;
 			this->cap=s;
 			this->head=0;
 			this->list=new T[cap];
@@ -260,6 +345,35 @@ class CDA {
 		 */
 		~CDA() {
 			delete [] this->list;
+		}
+
+		/**
+		 * Copy constructor
+		 */
+		CDA(CDA &original) {
+			this->size = original->size;
+			this->cap = original->cap;
+			this->head = original->head;
+			this->list = new T[this->cap];
+
+			for (int i=0;i<cap;i++) {
+				this->list[i] = original->list[i];
+			}
+		}
+
+		/**
+		 * Copy assignment operator
+		 */
+		CDA& operator=(CDA& original) {
+			this->size = original.size;
+			this->cap = original.cap;
+			this->head = original.head;
+			this->list = new T[this->cap];
+
+			for (int i=0;i<cap;i++) {
+				this->list[i] = original.list[i];
+			}
+			return *this;
 		}
 
 		/**
@@ -355,7 +469,6 @@ class CDA {
 
 		/**
 		 * Clears the CDA and starts over from a new CDA
-		 *
 		 */
 		void clear() {
 			delete [] this->list;
@@ -372,6 +485,7 @@ class CDA {
 		 * @return: returns the element being searched for
 		 */
 		T QuickSelect(int k) {
+			k--;
 			//select a pivot
 			int pivotIndex=0;
 			//partition
@@ -397,7 +511,24 @@ class CDA {
 		}
 
 		T WCSelect(int k) {
+			//Divide into partitions of size K
+			//Sort partitions
+			for (int i=k;i<size-1;i+=k) {
+				mergeSort(i-k,i);
+			}
+			//Find the median of those partitions
+			//Go left or right
 			//I strongly disagree with this algorithm
+		}
+
+        /**
+         * Sorts the values in the range from a min index to a max index
+         *
+         * @param min: the min index (included in sorting)
+         * @param max: the max index (included in sorting)
+         */
+		void selectionSort(int min, int max) {
+
 		}
 
 		/**
@@ -431,8 +562,23 @@ class CDA {
 			bool valid=1;
 			//while something
 
-			for (int i=0;valid;i++) {
-				valid=countingSort(base,comp, i);
+			try {
+				for (int i=0;valid;i++) {
+					valid=countingSort(base,comp, i);
+				}
+			} catch (int e) {
+                std::cout << "Maybe don't use radix sort for this type...\n";
+                /*
+                try {
+                    for (int i=0;valid;i++) {
+                        valid=countingSortCast(base,comp,i);
+                    }
+                } catch (int ex) {
+                    for (int i=0;valid;i++) {
+                        valid=countingSortCastPointer(base,comp,i);
+                    }
+                }
+                */
 			}
 		}
 
@@ -461,7 +607,7 @@ class CDA {
 		 * @param value: the data value being searched for
 		 * @returns: returns the index of the value
 		 */
-		int binarySearch(T value) {
+		int binSearch(T value) {
 			int min=0;
 			int max=this->size-1;
 			int mid=(max-min)/2;
@@ -493,6 +639,7 @@ class CDA {
 int main(int argc, char const *argv[]) {
 	std::cout << "Hello World!\n" << std::endl;
 
+	/*
 	CDA<int> list;
 	int numElements=6;
 
@@ -513,7 +660,7 @@ int main(int argc, char const *argv[]) {
 	list.printList();
 
 	list.radixSort(2);
-	list.printList();
+	list.printList(); */
 
 	/*
 	CDA<double> listD;
@@ -541,11 +688,29 @@ int main(int argc, char const *argv[]) {
 	listS.printList();
 	listS.radixSort(4);
 	listS.printList();
-	*/
+    */
+   /*
+   CDA<char> listC;
+   for (char i='A';i<'Y';i+=2) {
+		listC.addEnd(i);
+		listC.addFront(i+1);
+	}
+
+	std::cout << "********************" << std::endl;
+	listC.printList();
+	listC.stableSort();
+	listC.printList();
+
+	int ndex = listC.linearSearch('C');
+	std::cout << listC.linearSearch('C') << std::endl;
+	std::cout << listC[ndex] << std::endl;
+
+	int ndex2 = listC.binarySearch('C');
+	std::cout << listC.binarySearch('C') << std::endl;
+	std::cout << listC[ndex2] << std::endl;
+	std::cout << "********************" << std::endl;
 
 
-
-	/*
 	list.printList();
 	int dex = list.linearSearch(5);
 	std::cout << list.linearSearch(5) << std::endl;
@@ -556,7 +721,7 @@ int main(int argc, char const *argv[]) {
 	int dex2 = list.binarySearch(3);
 	std::cout << list.binarySearch(3) << std::endl;
 	std::cout << list[dex2] << std::endl;
-	*/
+
 
 
 	for (int j=1;j<16;j++) {
@@ -578,8 +743,152 @@ int main(int argc, char const *argv[]) {
 			list2.clear();
 		}
 	}
+	*/
 
+	std::cout << "******** Dixon Test ********"<< std::endl;
+
+	CDA<int> C(10);
+	for (int i=0; i< C.length();i++) C[i] = i;
+	//C[11]=5;
+	DUMP(C)
+	C.delFront();
+	DUMP(C)
+	C.delEnd();
+	DUMP(C)
+	C.addEnd(100);
+	DUMP(C)
+	C.addEnd(101);
+	DUMP(C)
+	C.delEnd(); C.delEnd();
+	C.addFront(-100); C.addFront(-200);
+	DUMP(C)
+	C.addFront(37);
+	DUMP(C)
+
+	for (int i=0; i< 20;i++) C.addEnd(i*i);
+	for (int i=0; i< 20;i++) C.addFront(-(i*i));
+	DUMP(C)
+
+	for (int i=0; i< 25;i++) C.delEnd();
+	for (int i=0; i< 10;i++) C.delFront();
+	DUMP(C)
+
+	CDA<int> D,A;
+	D = C;
+	A = C;
+
+	C[0] =  -201;
+// C is : -201 -64 -49 -36 -25 -16 -9 -4 -1 0 37 -200 -100 1 2 3
+	DUMP(D)
+// D is : -81 -64 -49 -36 -25 -16 -9 -4 -1 0 37 -200 -100 1 2 3
+
+	std::cout << "The index of 37 in C is : " << C.linearSearch(37) << std::endl;  // 10
+	std::cout << "The index of 37 in D is : " << D.linearSearch(37) << std::endl;  // 10
+
+    std::cout << "The 4th smallest item in C is : " << C.WCSelect(4) << std::endl;  //-64
+    std::cout << "The 5th smallest item in C is : " << C.QuickSelect(5) << std::endl; //-49
+
+	std::cout << "The smallest item in D is : " << D.QuickSelect(1) << std::endl << std::endl;  // -200
+
+	D.stableSort();
+	DUMP(D)
+// D is : -200 -100 -81 -64 -49 -36 -25 -16 -9 -4 -1 0 1 2 3 37
+
+	std::cout << "The index of -4 in D is : " << D.binSearch(-4) << std::endl << std::endl;  // 9
+
+	A[0] = 31743;
+	A[1] = 31744;
+	A[2] = 30720;
+	A[3] = 30719;
+	A.radixSort(10);
+	DUMP(A)
+// A is : 31744 30720 0 1 2 3 37 -200 -100 -25 -16 -9 -4 31743  30719 -1
 
 
 	return 0;
 }
+
+/*
+T findMedian(int arr[], int n) {
+
+	int minInd = 0;
+
+	for (int i = 0; i < n-1; i++) {
+		minInd = i;
+
+		for (int j = i+1; j < n; j++) {
+			if (arr[realIndex(j)] < arr[realIndex(minInd)])
+				minInd = j;
+		}
+
+		T temp = arr[realIndex(minInd)];
+		arr[realIndex(minInd)] = arr[realIndex(i)];
+		arr[realIndex(i)] = temp;
+	}
+
+	return arr[realIndex(n/2)];
+}
+
+T kthSmallestWC(int arr[], int l, int r, int k) {
+
+	if (k > 0 && k <= r - l + 1) {
+        int n = r-l+1;
+        int i, median[(n+4)/5];
+
+        for (i=0; i<n/5; i++) median[i] = findMedian(arr+l+i*5, 5);
+
+        if (i*5 < n)
+        {
+            median[i] = findMedian(arr+l+i*5, n%5);
+            i++;
+        }
+
+		int medOfMed = (i == 1)? median[i-1]:kthSmallest(median, 0, i-1, i/2);
+		cout << "MedOfMed = " << medOfMed << endl;
+
+		int pos = partitionWC(arr, l, r, medOfMed);
+        if (pos-l == k-1)
+            return arr[realIndex(pos)];
+
+		if (pos-l > k-1)
+            return kthSmallestWC(arr, l, pos-1, k);
+
+		return kthSmallestWC(arr, pos+1, r, k-pos+l-1);
+    }
+	else {
+		cout << "Invalid k-term for WCSelect";
+	}
+	return INT8_MAX;
+}
+
+int partitionWC(int arr[], int l, int r, T x) {
+   int i;
+   cout << "PARTITION CALLED" << endl;
+   for (i=l; i<r; i++) {
+		//cout << i << endl;
+		//cout << arr[realIndex(i)] << endl;
+       if (arr[realIndex(i)] == x)
+          break;
+	}
+	swap(&arr[realIndex(i)], &arr[realIndex(r)]);
+   i = l;
+   for (int j = l; j <= r - 1; j++)
+   {
+       if (arr[realIndex(j)] <= x)
+       {
+           swap(&arr[realIndex(i)], &arr[realIndex(j)]);
+           i++;
+       }
+   }
+   swap(&arr[realIndex(i)], &arr[realIndex(r)]);
+//for (int k = 0; k < size; k++) {
+// cout << arr[realIndex(k)] << endl;
+// }
+   return i;
+}
+
+T WCSelect(int k) {
+	cout << "WC SELECT CALLED" << endl;
+	return kthSmallestWC(list, 0, size - 1, k);
+}
+*/
