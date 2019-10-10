@@ -1,10 +1,19 @@
-all : testCDA
+all : testDixon testMe
 
-testCDA : cda.cpp
-	g++ -o testCDA cda.cpp
+testCDA : CircularDynamicArray.cpp
+	g++ -o testCDA CircularDynamicArray.cpp
 
-test : testCDA
-	./testCDA
+testDixon : CircularDynamicArray.cpp dixon.cpp
+	g++ -o testDixon dixon.cpp
+
+testMe : CircularDynamicArray.cpp me.cpp
+	g++ -o testMe me.cpp
+
+dixon: testDixon
+	./testDixon
+
+test: testMe
+	./testMe
 
 clean :
-	rm testCDA
+	rm testMe testDixon

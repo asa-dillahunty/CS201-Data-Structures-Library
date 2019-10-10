@@ -11,10 +11,9 @@
 #include <iostream>
 #include <string>
 #include <math.h>
-#define DUMP(X) std::cout << "size is : " << X.length() << std::endl << "capacity is : " << X.capacity() << std::endl; for (int i=0; i< X.length();i++) std::cout << X[i] << " ";  std::cout << std::endl << std::endl;
 
 template <class T>
-class CDA {
+class CircularDynamicArray {
 	private:
 		int size;
 		int cap;
@@ -93,7 +92,7 @@ class CDA {
 		 * I didn't want to have to put parameters on my sorting function
 		 */
 		void quickRecursive(int min, int max) {
-			int mid=partition(min,max);
+			int mid=partition(min,max,min);
 
 			if (mid-1>min) quickRecursive(min,mid-1);
 			if (mid+1<max) quickRecursive(mid+1,max);
@@ -109,10 +108,13 @@ class CDA {
 		 * @param max: the ending index of the portion of the array to be partitioned
 		 * @return: returns the pivot's updated position
 		 */
-		int partition(int min, int max) {
+		int partition(int min, int max, int pivotIndex) {
+			T swap=this->list[relativeIndex(min)];
+			this->list[relativeIndex(min)]=this->list[relativeIndex(pivotIndex)];
+			this->list[relativeIndex(pivotIndex)]=swap;
+			//swap pivot index and min
 			T pivot = this->list[relativeIndex(min)];
 			min++;
-			T swap;
 			int i=min;
 
 			for (;;) {
@@ -321,7 +323,7 @@ class CDA {
 		/**
 		 * This constructs the CDA with an initial capacity of 2
 		 */
-		CDA() {
+		CircularDynamicArray() {
 			this->size=0;
 			this->cap=2;
 			this->head=0;
@@ -333,7 +335,7 @@ class CDA {
 		 *
 		 * @param s: the given initial capacity
 		 */
-		CDA(int s) {
+		CircularDynamicArray(int s) {
 			this->size=s;
 			this->cap=s;
 			this->head=0;
@@ -343,14 +345,14 @@ class CDA {
 		/**
 		 * Deconstructs the CDA
 		 */
-		~CDA() {
+		~CircularDynamicArray() {
 			delete [] this->list;
 		}
 
 		/**
 		 * Copy constructor
 		 */
-		CDA(CDA &original) {
+		CircularDynamicArray(CircularDynamicArray &original) {
 			this->size = original->size;
 			this->cap = original->cap;
 			this->head = original->head;
@@ -364,14 +366,14 @@ class CDA {
 		/**
 		 * Copy assignment operator
 		 */
-		CDA& operator=(CDA& original) {
+		CircularDynamicArray& operator=(CircularDynamicArray& original) {
 			this->size = original.size;
 			this->cap = original.cap;
-			this->head = original.head;
+			this->head = 0;
 			this->list = new T[this->cap];
 
-			for (int i=0;i<cap;i++) {
-				this->list[i] = original.list[i];
+			for (int i=0;i<this->size;i++) {
+				this->list[i] = original[i];
 			}
 			return *this;
 		}
@@ -479,7 +481,8 @@ class CDA {
 		}
 
 		/**
-		 * Returns the kth smallest element
+		 * Returns the kth smallest element, smallest element being 1
+		 * and the largest being size
 		 *
 		 * @param k: the order of the element being searched for
 		 * @return: returns the element being searched for
@@ -492,7 +495,7 @@ class CDA {
 			int max=size-1;
 			int min=0;
 
-			pivotIndex = partition(min, max);
+			pivotIndex = partition(min, max, pivotIndex);
 
 			//count while loop
 			while (pivotIndex!=k) {
@@ -504,13 +507,37 @@ class CDA {
 					//go left
 					max = pivotIndex-1;
 				}
-				pivotIndex = partition(min, max);
+				pivotIndex = partition(min, max, min);
 			}
 			//partition
-			return this->list[relativeIndex(pivotIndex)];
+			return this->list[relativeIndex(k)];
 		}
 
 		T WCSelect(int k) {
+			k--;
+			//select a pivot
+			int pivotIndex=0;
+			//partition
+			int max=size-1;
+			int min=0;
+
+			pivotIndex = partition(min, max, pivotIndex);
+
+			//count while loop
+			while (pivotIndex!=k) {
+				if (pivotIndex<k) {
+					//go right
+					min = pivotIndex+1;
+				}
+				else {
+					//go left
+					max = pivotIndex-1;
+				}
+				pivotIndex = partition(min, max, pivotIndex);
+			}
+			//partition
+			return this->list[relativeIndex(pivotIndex)];
+
 			//Divide into partitions of size K
 			//Sort partitions
 			for (int i=k;i<size-1;i+=k) {
@@ -635,178 +662,6 @@ class CDA {
 			std::cout << std::endl;
 		}
 };
-
-int main(int argc, char const *argv[]) {
-	std::cout << "Hello World!\n" << std::endl;
-
-	/*
-	CDA<int> list;
-	int numElements=6;
-
-	for (int i=0;i<numElements;i+=2) {
-		list.addEnd(i);
-		list.addFront(i+1);
-	}
-
-	list.printList();
-	list.clear();
-	list.printList();
-
-	for (int i=0;i<numElements;i+=2) {
-		list.addEnd(i);
-		list.addFront(i+1);
-	}
-
-	list.printList();
-
-	list.radixSort(2);
-	list.printList(); */
-
-	/*
-	CDA<double> listD;
-	listD.addFront(.1);
-	listD.addFront(.01);
-	listD.addFront(.001);
-	listD.addFront(.0001);
-	listD.addFront(.2);
-	listD.printList();
-	listD.stableSort();
-	listD.printList();
-	listD.radixSort(4);
-	listD.printList();
-	*/
-
-	/*
-	CDA<std::string> listS;
-	listS.addFront("A Hello");
-	listS.addFront("B This");
-	listS.addFront("C Message");
-	listS.addFront("D Is");
-	listS.addFront("E Backwards");
-	listS.printList();
-	listS.stableSort();
-	listS.printList();
-	listS.radixSort(4);
-	listS.printList();
-    */
-   /*
-   CDA<char> listC;
-   for (char i='A';i<'Y';i+=2) {
-		listC.addEnd(i);
-		listC.addFront(i+1);
-	}
-
-	std::cout << "********************" << std::endl;
-	listC.printList();
-	listC.stableSort();
-	listC.printList();
-
-	int ndex = listC.linearSearch('C');
-	std::cout << listC.linearSearch('C') << std::endl;
-	std::cout << listC[ndex] << std::endl;
-
-	int ndex2 = listC.binarySearch('C');
-	std::cout << listC.binarySearch('C') << std::endl;
-	std::cout << listC[ndex2] << std::endl;
-	std::cout << "********************" << std::endl;
-
-
-	list.printList();
-	int dex = list.linearSearch(5);
-	std::cout << list.linearSearch(5) << std::endl;
-	std::cout << list[dex] << std::endl;
-
-	list.stableSort();
-	list.printList();
-	int dex2 = list.binarySearch(3);
-	std::cout << list.binarySearch(3) << std::endl;
-	std::cout << list[dex2] << std::endl;
-
-
-
-	for (int j=1;j<16;j++) {
-		CDA<int> list2;
-
-		for (int k=10;k<10000000;k=k*10) {
-
-			for (int h=0;h<k;h+=2) {
-				list2.addEnd(h);
-				list2.addFront(h+1);
-			}
-
-			list2.radixSort(j);
-
-			for (int i=0;i<k;i++) {
-				if (i!=list2[i]) std::cout << "YOU SUCK" << std::endl;
-			}
-
-			list2.clear();
-		}
-	}
-	*/
-
-	std::cout << "******** Dixon Test ********"<< std::endl;
-
-	CDA<int> C(10);
-	for (int i=0; i< C.length();i++) C[i] = i;
-	//C[11]=5;
-	DUMP(C)
-	C.delFront();
-	DUMP(C)
-	C.delEnd();
-	DUMP(C)
-	C.addEnd(100);
-	DUMP(C)
-	C.addEnd(101);
-	DUMP(C)
-	C.delEnd(); C.delEnd();
-	C.addFront(-100); C.addFront(-200);
-	DUMP(C)
-	C.addFront(37);
-	DUMP(C)
-
-	for (int i=0; i< 20;i++) C.addEnd(i*i);
-	for (int i=0; i< 20;i++) C.addFront(-(i*i));
-	DUMP(C)
-
-	for (int i=0; i< 25;i++) C.delEnd();
-	for (int i=0; i< 10;i++) C.delFront();
-	DUMP(C)
-
-	CDA<int> D,A;
-	D = C;
-	A = C;
-
-	C[0] =  -201;
-// C is : -201 -64 -49 -36 -25 -16 -9 -4 -1 0 37 -200 -100 1 2 3
-	DUMP(D)
-// D is : -81 -64 -49 -36 -25 -16 -9 -4 -1 0 37 -200 -100 1 2 3
-
-	std::cout << "The index of 37 in C is : " << C.linearSearch(37) << std::endl;  // 10
-	std::cout << "The index of 37 in D is : " << D.linearSearch(37) << std::endl;  // 10
-
-    std::cout << "The 4th smallest item in C is : " << C.WCSelect(4) << std::endl;  //-64
-    std::cout << "The 5th smallest item in C is : " << C.QuickSelect(5) << std::endl; //-49
-
-	std::cout << "The smallest item in D is : " << D.QuickSelect(1) << std::endl << std::endl;  // -200
-
-	D.stableSort();
-	DUMP(D)
-// D is : -200 -100 -81 -64 -49 -36 -25 -16 -9 -4 -1 0 1 2 3 37
-
-	std::cout << "The index of -4 in D is : " << D.binSearch(-4) << std::endl << std::endl;  // 9
-
-	A[0] = 31743;
-	A[1] = 31744;
-	A[2] = 30720;
-	A[3] = 30719;
-	A.radixSort(10);
-	DUMP(A)
-// A is : 31744 30720 0 1 2 3 37 -200 -100 -25 -16 -9 -4 31743  30719 -1
-
-
-	return 0;
-}
 
 /*
 T findMedian(int arr[], int n) {
