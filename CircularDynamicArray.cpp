@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <random>
 
 template <class T>
 class CircularDynamicArray {
@@ -78,8 +79,9 @@ class CircularDynamicArray {
 		 * operator calls it
 		 */
 		int relativeIndex(int index) {
+            return (this->head+index+this->cap)%this->cap;
 			if (index<0 || index>this->size-1) {
-				std::string error = "Index " + std::to_string(index) + " is out of range\n";
+				std::string error = "\n\n\nIndex " + std::to_string(index) + " is out of range\n\n\n\n";
 				throw std::out_of_range(error);
 			}
 			else {
@@ -109,10 +111,14 @@ class CircularDynamicArray {
 		 * @return: returns the pivot's updated position
 		 */
 		int partition(int min, int max, int pivotIndex) {
+            if (max <= min) return min;
+            
 			T swap=this->list[relativeIndex(min)];
 			this->list[relativeIndex(min)]=this->list[relativeIndex(pivotIndex)];
 			this->list[relativeIndex(pivotIndex)]=swap;
 			//swap pivot index and min
+            
+            
 			T pivot = this->list[relativeIndex(min)];
 			min++;
 			int i=min;
@@ -139,7 +145,45 @@ class CircularDynamicArray {
 					}
 				}
 			}
-		}
+        }
+    
+        /**
+         * This function is used in WCSelect
+         * This finds the median of small portions of the array, and then
+         * finds the median of those medians, and returns that median's
+         * index. This is used to ensure a good partition.
+         *
+         * @param min: minimum index when looking for a median
+         * @param max: maximum index to look for a median
+         */
+        int medianOfMedians(int min, int max) {
+            int medianSize=5;
+            int numMedians = (max-min)/medianSize+1;
+            int* medians_i = new int[numMedians];
+            int i,j,d;
+            int median;
+            
+            for (j=0, i=min+medianSize; i-1<=max;j++, i+=medianSize) {
+                //I tested merge sort vs selection
+                //Drastic difference. Honestly did not expect
+                selectionSort(i-medianSize,i-1);
+                medians_i[j] = ((i-1)+(i-medianSize))/2;
+                //select this median
+            }
+            
+            d=(max-min+1)%medianSize;
+            if (d) { //100% certain j iterates
+                mergeSort(i-medianSize,i-1-(medianSize-d));
+                medians_i[j] = (i-medianSize+i-1-(medianSize-d))/2;
+            }
+            
+            //get median of medians
+            selectionSortArr(medians_i,0,(max-min)/medianSize);
+            median = medians_i[((max-min)/medianSize)/2];
+                        
+            delete [] medians_i;
+            return median;
+        }
 
 		/**
 		 * Merge sort
@@ -168,7 +212,7 @@ class CircularDynamicArray {
 		 * @param mid: the point where the two different arrays meet
 		 */
 		void zip(int min, int mid, int max) {
-			T temp[max-min+1];
+			T* temp = new T[max-min+1];
 			int smin=min; //starting min
 
 			int rmid=mid; //right mid
@@ -191,6 +235,7 @@ class CircularDynamicArray {
 			for (int j=0;j<i;j++) {
 				this->list[relativeIndex(j+smin)]=temp[j];
 			}
+            delete [] temp;
 		}
 
 		/**
@@ -235,90 +280,6 @@ class CircularDynamicArray {
 			return valid;
 		}
 
-		/**
-		 * Used by Radix sort
-		 *
-		 * Sorts data by the value of the bits and not by using
-		 * the comparision operators
-		 *
-		 * Data may not be sorted the way you want it to be
-		 *
-		 * @param base: the base being compared
-		 * @param comp: the number used to compare to get the bits
-		 * @param exp: the number of bits/base already compared
-		 */
-		bool countingSortCast(int base, int comp, int exp) {
-			bool valid=0;
-			int countArr[base];
-			int shift=pow(base, exp);
-
-			for (int i=0;i<base;i++) countArr[i]=0;
-
-			for (int i=0;i<this->size;i++) {
-				countArr[(((int) this->list[relativeIndex(i)])/shift)&comp]++;
-				if (valid || ((int) this->list[relativeIndex(i)])/shift != 0) valid=1;
-			}
-
-			countArr[base-1]=this->size-countArr[base-1];
-			for (int i=base-2;i>=0;i--) {
-				countArr[i]=countArr[i+1]-countArr[i];
-			}
-
-			T* sorted = new T[this->cap];
-			for (int i=0;i<size;i++) {
-				sorted[countArr[(((int) this->list[relativeIndex(i)])/shift)&comp]++]=this->list[relativeIndex(i)];
-			}
-
-			//Make sure everything is deleted?? Possible memory leak
-			delete [] this->list;
-			this->list = sorted;
-			this->head = 0;
-
-			return valid;
-		}
-
-        /**
-         * Used by Radix sort
-         *
-         * Sorts data by the value of the bits and not by using
-         * the comparision operators
-         *
-         * Data may not be sorted the way you want it to be
-         *
-         * @param base: the base being compared
-         * @param comp: the number used to compare to get the bits
-         * @param exp: the number of bits/base already compared
-         */
-        bool countingSortCastPointer(int base, int comp, int exp) {
-            bool valid=0;
-            int countArr[base];
-            int shift=pow(base, exp);
-
-            for (int i=0;i<base;i++) countArr[i]=0;
-
-            for (int i=0;i<this->size;i++) {
-                countArr[(((int) &this->list[relativeIndex(i)])/shift)&comp]++;
-                if (valid || ((int) &this->list[relativeIndex(i)])/shift != 0) valid=1;
-            }
-
-            countArr[base-1]=this->size-countArr[base-1];
-            for (int i=base-2;i>=0;i--) {
-                countArr[i]=countArr[i+1]-countArr[i];
-            }
-
-            T* sorted = new T[this->cap];
-            for (int i=0;i<size;i++) {
-                sorted[countArr[(((int) &this->list[relativeIndex(i)])/shift)&comp]++]=this->list[relativeIndex(i)];
-            }
-
-            //Make sure everything is deleted?? Possible memory leak
-            delete [] this->list;
-            this->list = sorted;
-            this->head = 0;
-
-            return valid;
-        }
-
 	public:
 		/**
 		 * This constructs the CDA with an initial capacity of 2
@@ -355,11 +316,11 @@ class CircularDynamicArray {
 		CircularDynamicArray(CircularDynamicArray &original) {
 			this->size = original->size;
 			this->cap = original->cap;
-			this->head = original->head;
+			this->head = 0;
 			this->list = new T[this->cap];
 
-			for (int i=0;i<cap;i++) {
-				this->list[i] = original->list[i];
+			for (int i=0;i<this->size;i++) {
+				this->list[i] = original[i];
 			}
 		}
 
@@ -495,7 +456,7 @@ class CircularDynamicArray {
 			int max=size-1;
 			int min=0;
 
-			pivotIndex = partition(min, max, pivotIndex);
+			pivotIndex = partition(min, max, min);
 
 			//count while loop
 			while (pivotIndex!=k) {
@@ -514,38 +475,27 @@ class CircularDynamicArray {
 		}
 
 		T WCSelect(int k) {
-			k--;
+			k--; //This is done because 1 is the smallest number
 			//select a pivot
 			int pivotIndex=0;
 			//partition
-			int max=size-1;
+			int max=this->size-1;
 			int min=0;
-
+            
+            pivotIndex = medianOfMedians(min, max);
 			pivotIndex = partition(min, max, pivotIndex);
 
 			//count while loop
 			while (pivotIndex!=k) {
-				if (pivotIndex<k) {
-					//go right
-					min = pivotIndex+1;
-				}
-				else {
-					//go left
-					max = pivotIndex-1;
-				}
-				pivotIndex = partition(min, max, pivotIndex);
+				if (pivotIndex<k) min = pivotIndex+1; //go right
+				else max = pivotIndex-1; // go left
+                
+                //median of medians pivot selection
+                pivotIndex = medianOfMedians(min,max);
+                pivotIndex = partition(min, max, pivotIndex);
 			}
 			//partition
 			return this->list[relativeIndex(pivotIndex)];
-
-			//Divide into partitions of size K
-			//Sort partitions
-			for (int i=k;i<size-1;i+=k) {
-				mergeSort(i-k,i);
-			}
-			//Find the median of those partitions
-			//Go left or right
-			//I strongly disagree with this algorithm
 		}
 
         /**
@@ -555,8 +505,54 @@ class CircularDynamicArray {
          * @param max: the max index (included in sorting)
          */
 		void selectionSort(int min, int max) {
-
+            int min_i;
+            T minVal;
+            
+            for (;min<max;min++) {
+                min_i = min;
+                T minVal = this->list[relativeIndex(min_i)];
+                //get min value
+                for (int i=min+1;i<max;i++) {
+                    if (this->list[relativeIndex(i)] < minVal) {
+                        minVal = this->list[relativeIndex(i)];
+                        min_i=i;
+                    }
+                }
+                //swap
+                this->list[relativeIndex(min_i)] = this->list[relativeIndex(min)];
+                this->list[relativeIndex(min)] = minVal;
+            }
 		}
+    
+        /**
+         * Sorts the at index of arr (so arr is the index for the CDA
+         * and not the actual values to be sorted) in range min to max
+         *
+         * @param min: the min index (included in sorting)
+         * @param max: the max index (included in sorting)
+         */
+        void selectionSortArr(int* arr, int min, int max) { //90% Certain this works
+            int min_i;
+            T minVal;
+            int swap;
+            
+            for (int i=min;i<max;min++,i++) {
+                //find min
+                min_i = min;
+                minVal = this->list[relativeIndex(arr[min_i])];
+                
+                for (int j=min + 1;j<=max;j++) {
+                    if (this->list[relativeIndex(arr[j])] < minVal) {
+                        min_i = j;
+                        minVal = this->list[relativeIndex(arr[min_i])];
+                    }
+                }
+                swap = arr[min];
+                arr[min] = arr[min_i];
+                arr[min_i] = swap;
+                //swap min, iterate
+            }
+        }
 
 		/**
 		 * This sort was simply written to verify partition functioned
@@ -588,25 +584,10 @@ class CircularDynamicArray {
 			int comp=base-1;
 			bool valid=1;
 			//while something
-
-			try {
-				for (int i=0;valid;i++) {
-					valid=countingSort(base,comp, i);
-				}
-			} catch (int e) {
-                std::cout << "Maybe don't use radix sort for this type...\n";
-                /*
-                try {
-                    for (int i=0;valid;i++) {
-                        valid=countingSortCast(base,comp,i);
-                    }
-                } catch (int ex) {
-                    for (int i=0;valid;i++) {
-                        valid=countingSortCastPointer(base,comp,i);
-                    }
-                }
-                */
-			}
+            
+            for (int i=0;valid;i++) {
+                valid=countingSort(base,comp, i);
+            }
 		}
 
 		/**
@@ -661,89 +642,17 @@ class CircularDynamicArray {
 			}
 			std::cout << std::endl;
 		}
-};
-
-/*
-T findMedian(int arr[], int n) {
-
-	int minInd = 0;
-
-	for (int i = 0; i < n-1; i++) {
-		minInd = i;
-
-		for (int j = i+1; j < n; j++) {
-			if (arr[realIndex(j)] < arr[realIndex(minInd)])
-				minInd = j;
-		}
-
-		T temp = arr[realIndex(minInd)];
-		arr[realIndex(minInd)] = arr[realIndex(i)];
-		arr[realIndex(i)] = temp;
-	}
-
-	return arr[realIndex(n/2)];
-}
-
-T kthSmallestWC(int arr[], int l, int r, int k) {
-
-	if (k > 0 && k <= r - l + 1) {
-        int n = r-l+1;
-        int i, median[(n+4)/5];
-
-        for (i=0; i<n/5; i++) median[i] = findMedian(arr+l+i*5, 5);
-
-        if (i*5 < n)
-        {
-            median[i] = findMedian(arr+l+i*5, n%5);
-            i++;
+    
+        void randomize() {
+            T swap;
+            int a,b;
+            for (int i=0;i<this->size;i++) {
+                a = rand()%(this->size);
+                b = rand()%(this->size);
+                
+                swap = this->list[relativeIndex(a)];
+                this->list[relativeIndex(a)] = this->list[relativeIndex(b)];
+                this->list[relativeIndex(b)] = swap;
+            }
         }
-
-		int medOfMed = (i == 1)? median[i-1]:kthSmallest(median, 0, i-1, i/2);
-		cout << "MedOfMed = " << medOfMed << endl;
-
-		int pos = partitionWC(arr, l, r, medOfMed);
-        if (pos-l == k-1)
-            return arr[realIndex(pos)];
-
-		if (pos-l > k-1)
-            return kthSmallestWC(arr, l, pos-1, k);
-
-		return kthSmallestWC(arr, pos+1, r, k-pos+l-1);
-    }
-	else {
-		cout << "Invalid k-term for WCSelect";
-	}
-	return INT8_MAX;
-}
-
-int partitionWC(int arr[], int l, int r, T x) {
-   int i;
-   cout << "PARTITION CALLED" << endl;
-   for (i=l; i<r; i++) {
-		//cout << i << endl;
-		//cout << arr[realIndex(i)] << endl;
-       if (arr[realIndex(i)] == x)
-          break;
-	}
-	swap(&arr[realIndex(i)], &arr[realIndex(r)]);
-   i = l;
-   for (int j = l; j <= r - 1; j++)
-   {
-       if (arr[realIndex(j)] <= x)
-       {
-           swap(&arr[realIndex(i)], &arr[realIndex(j)]);
-           i++;
-       }
-   }
-   swap(&arr[realIndex(i)], &arr[realIndex(r)]);
-//for (int k = 0; k < size; k++) {
-// cout << arr[realIndex(k)] << endl;
-// }
-   return i;
-}
-
-T WCSelect(int k) {
-	cout << "WC SELECT CALLED" << endl;
-	return kthSmallestWC(list, 0, size - 1, k);
-}
-*/
+};

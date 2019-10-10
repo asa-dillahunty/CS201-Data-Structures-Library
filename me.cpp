@@ -11,114 +11,182 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <chrono>
 #include "CircularDynamicArray.cpp"
+
+bool testQuickSort() {
+    std::cout << "Starting Quick Sort Test" << std::endl;
+    CircularDynamicArray<int> list;
+
+    for (int j=1;j<16;j++) {
+        for (int k=10;k<1000000;k=k*10) {
+
+            for (int h=0;h<k;h+=2) {
+                list.addEnd(h);
+                list.addFront(h+1);
+            }
+            
+            list.randomize();
+            list.quickSort();
+
+            for (int i=0;i<k;i++) {
+                if (i!=list[i]) return false;
+            }
+
+            list.clear();
+        }
+    }
+    std::cout << "Finished Quick Sort Test With No Errors" << std::endl;
+    return true;
+}
+
+bool testStableSort() {
+    std::cout << "Starting Stable Sort Test" << std::endl;
+    CircularDynamicArray<int> list;
+
+    for (int j=1;j<16;j++) {
+        for (int k=10;k<1000000;k=k*10) {
+
+            for (int h=0;h<k;h+=2) {
+                list.addEnd(h);
+                list.addFront(h+1);
+            }
+            
+            list.randomize();
+            list.stableSort();
+
+            for (int i=0;i<k;i++) {
+                if (i!=list[i]) return false;
+            }
+
+            list.clear();
+        }
+    }
+    std::cout << "Finished Stable Sort Test With No Errors" << std::endl;
+    return true;
+}
+
+bool testRadixSort() {
+    std::cout << "Starting Radix Sort Test" << std::endl;
+    CircularDynamicArray<int> list;
+
+    for (int j=1;j<16;j++) {
+        for (int k=10;k<1000000;k=k*10) {
+
+            for (int h=0;h<k;h+=2) {
+                list.addEnd(h);
+                list.addFront(h+1);
+            }
+            
+            list.randomize();
+            list.radixSort(j);
+
+            for (int i=0;i<k;i++) {
+                if (i!=list[i]) return false;
+            }
+
+            list.clear();
+        }
+    }
+    std::cout << "Finished Radix Sort Test With No Errors" << std::endl;
+    return true;
+}
+
+bool testWCSelect() {
+    std::cout << "Starting WCSelect Test" << std::endl;
+    CircularDynamicArray<int> list;
+    int total=500;
+    
+    for (int j=0;j<total;j++) list.addEnd(j);
+    
+    
+    for (int j=1;j<total+1;j++) {
+        if (list.WCSelect(j) != j-1) {
+            return false;
+        }
+    }
+    
+    for (int j=1;j<total+1;j++) {
+        list.randomize();
+        if (list.WCSelect(j) != j-1) {
+            return false;
+        }
+    }
+    
+    
+    
+    std::cout << "Fished WCSelect Test With No Errors" << std::endl;
+    return true;
+}
+
+void timeWCSelect() {
+    CircularDynamicArray<int> list;
+    
+    auto total = std::chrono::high_resolution_clock::now();
+    
+    for (int numElements=49;numElements<50;numElements*=2) {
+        
+        for (int h=0;h<numElements;h++) list.addEnd(h);
+            for (int j=0;j<numElements;j++) list.addFront(j);
+                for (int k=0;k<numElements;k++) list.addEnd(k);
+                    for (int i=0;i<numElements;i+=2) {
+                        list.addEnd(i);
+                        list.addFront(i+1);
+                    }
+        //This should be *4
+        
+        using namespace std::chrono;
+        list.randomize();
+        auto start = high_resolution_clock::now();
+        for (int i=1;i<=list.length();i++)
+            if (list.WCSelect(i) != (i-1)/4) std::cout << "FUCK";
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        std::cout << numElements << "," << duration.count() << std::endl;
+    }
+}
+
+void timeSorts() {
+    CircularDynamicArray<int> list;
+    
+    for (int numElements=1;numElements<50;numElements*=2) {
+        
+        for (int h=0;h<numElements;h++) list.addEnd(h);
+            for (int j=0;j<numElements;j++) list.addFront(j);
+                for (int k=0;k<numElements;k++) list.addEnd(k);
+                    for (int i=0;i<numElements;i+=2) {
+                        list.addEnd(i);
+                        list.addFront(i+1);
+                    }
+        //This should be *4
+        
+        using namespace std::chrono;
+        list.randomize();
+        auto start = high_resolution_clock::now();
+        list.quickSort();
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        std::cout << numElements << "," << duration.count() << std::endl;
+    }
+}
 
 int main(int argc, char const *argv[]) {
 	std::cout << "Hello World!\n" << std::endl;
-
-
-	CircularDynamicArray<int> list;
-	int numElements=60;
-
-	for (int i=0;i<numElements;i+=2) {
-		list.addEnd(i);
-		list.addFront(i+1);
-	}
-
-	list.printList();
-	list.clear();
-	list.printList();
-
-	for (int i=0;i<numElements;i+=2) {
-		list.addEnd(i);
-		list.addFront(i+1);
-	}
-
-	list.printList();
-
-	list.quickSort();
-	list.printList();
-
-	/*
-	CircularDynamicArray<double> listD;
-	listD.addFront(.1);
-	listD.addFront(.01);
-	listD.addFront(.001);
-	listD.addFront(.0001);
-	listD.addFront(.2);
-	listD.printList();
-	listD.stableSort();
-	listD.printList();
-	listD.radixSort(4);
-	listD.printList();
-	*/
-
-	/*
-	CircularDynamicArray<std::string> listS;
-	listS.addFront("A Hello");
-	listS.addFront("B This");
-	listS.addFront("C Message");
-	listS.addFront("D Is");
-	listS.addFront("E Backwards");
-	listS.printList();
-	listS.stableSort();
-	listS.printList();
-	listS.radixSort(4);
-	listS.printList();
-    */
-   /*
-   CircularDynamicArray<char> listC;
-   for (char i='A';i<'Y';i+=2) {
-		listC.addEnd(i);
-		listC.addFront(i+1);
-	}
-
-	std::cout << "********************" << std::endl;
-	listC.printList();
-	listC.stableSort();
-	listC.printList();
-
-	int ndex = listC.linearSearch('C');
-	std::cout << listC.linearSearch('C') << std::endl;
-	std::cout << listC[ndex] << std::endl;
-
-	int ndex2 = listC.binarySearch('C');
-	std::cout << listC.binarySearch('C') << std::endl;
-	std::cout << listC[ndex2] << std::endl;
-	std::cout << "********************" << std::endl;
-
-
-	list.printList();
-	int dex = list.linearSearch(5);
-	std::cout << list.linearSearch(5) << std::endl;
-	std::cout << list[dex] << std::endl;
-
-	list.stableSort();
-	list.printList();
-	int dex2 = list.binarySearch(3);
-	std::cout << list.binarySearch(3) << std::endl;
-	std::cout << list[dex2] << std::endl;
-
-
-
-	for (int j=1;j<16;j++) {
-		CircularDynamicArray<int> list2;
-
-		for (int k=10;k<10000000;k=k*10) {
-
-			for (int h=0;h<k;h+=2) {
-				list2.addEnd(h);
-				list2.addFront(h+1);
-			}
-
-			list2.radixSort(j);
-
-			for (int i=0;i<k;i++) {
-				if (i!=list2[i]) std::cout << "YOU SUCK" << std::endl;
-			}
-
-			list2.clear();
-		}
-	}
-	*/
+    
+    timeWCSelect();
+    
+    if (!testWCSelect()) {
+        std::cout << "WCSelect Failed" << std::endl;
+    }
+    if (!testQuickSort()) {
+        std::cout << "Quick Sort Failed" << std::endl;
+    }
+    if (!testStableSort()) {
+        std::cout << "Stable Sort Failed" << std::endl;
+    }
+    if (!testRadixSort()) {
+        std::cout << "Radix Sort Failed" << std::endl;
+    }
+    
+    return 0;
 }
