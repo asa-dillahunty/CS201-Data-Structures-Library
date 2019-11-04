@@ -1,12 +1,12 @@
-using namespace std;
 #include <iostream>
+using namespace std;
 #include "CircularDynamicArray.cpp"
 #define DUMP(X) cout << "size is : " << X.length() << endl << "capacity is : " << X.capacity() << endl; for (int i=0; i< X.length();i++) cout << X[i] << " ";  cout << endl << endl;
 
 int main(){
 	CircularDynamicArray<int> C(10);
 	for (int i=0; i< C.length();i++) C[i] = i;
-	//C[11]=5;
+	C[11]=5;
 	DUMP(C)
 	C.delFront();
 	DUMP(C)

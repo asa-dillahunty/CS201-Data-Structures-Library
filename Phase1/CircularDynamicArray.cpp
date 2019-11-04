@@ -20,6 +20,7 @@ class CircularDynamicArray {
 		int cap;
 		int head;
 		T *list;
+		T trash;
 
 		/**
 		 * Increases the size of the internal array
@@ -79,10 +80,12 @@ class CircularDynamicArray {
 		 * operator calls it
 		 */
 		int relativeIndex(int index) {
-            return (this->head+index+this->cap)%this->cap;
+            //return (this->head+index+this->cap)%this->cap;
 			if (index<0 || index>this->size-1) {
-				std::string error = "\n\n\nIndex " + std::to_string(index) + " is out of range\n\n\n\n";
-				throw std::out_of_range(error);
+				//std::string error = "\n\n\nIndex " + std::to_string(index) + " is out of range\n\n\n\n";
+				//throw std::out_of_range(error);
+				std::cout << "Index " + std::to_string(index) + " is out of range" << std::endl;
+				return trash;
 			}
 			else {
 				return (this->head+index)%this->cap;
@@ -258,7 +261,7 @@ class CircularDynamicArray {
 			for (int i=0;i<base;i++) countArr[i]=0;
 
 			for (int i=0;i<this->size;i++) {
-				countArr[(this->list[relativeIndex(i)]/shift)&comp]++;
+				countArr[((this->list[relativeIndex(i)])/shift)&comp]++;
 				if (valid || this->list[relativeIndex(i)]/shift != 0) valid=1;
 			}
 
@@ -269,7 +272,7 @@ class CircularDynamicArray {
 
 			T* sorted = new T[this->cap];
 			for (int i=0;i<size;i++) {
-				sorted[countArr[(this->list[relativeIndex(i)]/shift)&comp]++]=this->list[relativeIndex(i)];
+				sorted[countArr[((this->list[relativeIndex(i)])/shift)&comp]++]=this->list[relativeIndex(i)];
 			}
 
 			//Make sure everything is deleted?? Possible memory leak
@@ -289,6 +292,8 @@ class CircularDynamicArray {
 			this->cap=2;
 			this->head=0;
 			this->list=new T[cap];
+
+			this->trash=0;
 		}
 
 		/**
@@ -301,6 +306,8 @@ class CircularDynamicArray {
 			this->cap=s;
 			this->head=0;
 			this->list=new T[cap];
+
+			this->trash=0;
 		}
 
 		/**
@@ -450,6 +457,7 @@ class CircularDynamicArray {
 		 */
 		T QuickSelect(int k) {
 			k--;
+			if (k<0 || k>this->size-1) return this->trash; //if k is out of bounds
 			//select a pivot
 			int pivotIndex=0;
 			//partition
@@ -476,6 +484,7 @@ class CircularDynamicArray {
 
 		T WCSelect(int k) {
 			k--; //This is done because 1 is the smallest number
+			if (k<0 || k>this->size-1) return this->trash; //if k is out of bounds
 			//select a pivot
 			int pivotIndex=0;
 			//partition
@@ -585,9 +594,14 @@ class CircularDynamicArray {
 			bool valid=1;
 			//while something
             
+            //He just wants the first k bits
+			/*
             for (int i=0;valid;i++) {
                 valid=countingSort(base,comp, i);
             }
+			*/
+
+			countingSort(base,comp,0);
 		}
 
 		/**
@@ -643,7 +657,10 @@ class CircularDynamicArray {
 			std::cout << std::endl;
 		}
     
-        void randomize() {
+        /**
+		 * Bogo sorts the CDA, but without the check to see if it's sorted
+		 */
+		void randomize() {
             T swap;
             int a,b;
             for (int i=0;i<this->size;i++) {
