@@ -81,15 +81,14 @@ class CircularDynamicArray {
 		 */
 		int relativeIndex(int index) {
             //return (this->head+index+this->cap)%this->cap;
-			if (index<0 || index>this->size-1) {
+			//if (index<0 || index>this->size-1) {
 				//std::string error = "\n\n\nIndex " + std::to_string(index) + " is out of range\n\n\n\n";
 				//throw std::out_of_range(error);
-				std::cout << "Index " + std::to_string(index) + " is out of range" << std::endl;
-				return trash;
-			}
-			else {
+			//	return trash;
+			//}
+			//else {
 				return (this->head+index)%this->cap;
-			}
+			//}
 		}
 
 		/**
@@ -353,7 +352,11 @@ class CircularDynamicArray {
 		 * @return: returns the data stored at the index
 		 */
 		T& operator[](int index) {
-			return this->list[this->relativeIndex(index)];
+			if (index < 0 || index > this->size-1) {
+				std::cout << "Out of bouds reference : " << index << std::endl;
+				return this->trash;
+			}
+			else return this->list[this->relativeIndex(index)];
 		}
 
 		/**
@@ -487,7 +490,7 @@ class CircularDynamicArray {
 			if (k<0 || k>this->size-1) return this->trash; //if k is out of bounds
 			//select a pivot
 			int pivotIndex=0;
-			//partition
+			
 			int max=this->size-1;
 			int min=0;
             
@@ -595,11 +598,11 @@ class CircularDynamicArray {
 			//while something
             
             //He just wants the first k bits
-			/*
-            for (int i=0;valid;i++) {
-                valid=countingSort(base,comp, i);
-            }
-			*/
+			
+            //for (int i=0;valid;i++) {
+              //  valid=countingSort(base,comp, i);
+            //}
+			
 
 			countingSort(base,comp,0);
 		}
