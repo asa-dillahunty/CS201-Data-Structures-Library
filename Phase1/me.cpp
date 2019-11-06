@@ -99,7 +99,6 @@ bool testWCSelect() {
     
     for (int j=0;j<total;j++) list.addEnd(j);
     
-    
     for (int j=1;j<total+1;j++) {
         if (list.WCSelect(j) != j-1) {
             return false;
@@ -113,8 +112,6 @@ bool testWCSelect() {
         }
     }
     
-    
-    
     std::cout << "Fished WCSelect Test With No Errors" << std::endl;
     return true;
 }
@@ -124,7 +121,7 @@ void timeWCSelect() {
     
     auto total = std::chrono::high_resolution_clock::now();
     
-    for (int numElements=49;numElements<50;numElements*=2) {
+    for (int numElements=449;numElements<450;numElements*=2) {
         
         for (int h=0;h<numElements;h++) list.addEnd(h);
             for (int j=0;j<numElements;j++) list.addFront(j);
