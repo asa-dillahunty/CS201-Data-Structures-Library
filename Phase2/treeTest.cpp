@@ -46,7 +46,7 @@ int main() {
 		tree->insert(i,i);
 		if (tree->size() != i+1) cout << "Sux" << endl;
 	}
-	dumpTree(tree,"testTxt/test.txt",true);
+	//dumpTree(tree,"testTxt/test.txt",true);
 	dumpTree(tree);
 	tree->insert(1,1);
 	dumpTree(tree);

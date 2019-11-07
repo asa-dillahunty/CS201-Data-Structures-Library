@@ -5,10 +5,8 @@ using namespace std;
 void dumpTree(RBTree<string,int> tree) { //true for read, false for write
 
 	cout << "size is : " << tree.size() << endl;
-	cout << "inorder is : " << tree.inorder() << endl;
-	cout << "preorder is : " << tree.preorder() << endl;
-	cout << "Keys in order is : " << tree.keyInOrder() << endl;
-	cout << "Colors: "; tree.printColors();cout << endl;
+	cout << "inorder is : "; tree.inorder(); cout << endl;
+	cout << "preorder is : "; tree.preorder(); cout << endl;
 }
 
 int main(){
@@ -62,13 +60,15 @@ int main(){
 	// Should output 4
 	*/
 	
+	
     RBTree<int,int> X;
 	for (int i=1;i<100000;i++) X.insert(i,i);
 	for (int i=1;i<100000;i++) {
 		if(X.rank(i) != i) cout << "Rank error" << endl;
 		if(X.select(i) != i) cout << "Select error" << endl;
 		if(*(X.search(i)) != i) cout << "Search error" << endl;
-	}  
+	}
+	
 	//Should be no output and should take seconds, not minutes
 	return 0;
 }
