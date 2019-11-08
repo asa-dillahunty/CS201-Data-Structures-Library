@@ -18,7 +18,7 @@ static bool black = false;
 
 template <class K,class V>
 class RBTree {
-	public:
+	private:
 
 		/**
 		 * Struct for the node class
@@ -271,10 +271,6 @@ class RBTree {
 			return output;
 		}
 
-		void printColors() {
-			printColors(this->root);
-		}
-
 		/**
 		 * Prints a pre-order traversal of the tree with colors listed beside values
 		 *
@@ -510,9 +506,11 @@ class RBTree {
 			else return 0;
 		}
 
-		/**************************************
-		 * * * * * End of Node Struct * * * * *
-		 **************************************/
+		/******************************************************************************
+		 * * * * * * * * * * * * * * * End of Node Struct * * * * * * * * * * * * * * *
+		 ******************************************************************************/
+
+	public:
 
 		RBTree() {
 			this->root = NULL;
@@ -613,6 +611,10 @@ class RBTree {
 
 		string postorder() {
 			return printPostOrder(root);
+		}
+
+		void printColors() {
+			printColors(this->root);
 		}
 
 		string keyInOrder() {
