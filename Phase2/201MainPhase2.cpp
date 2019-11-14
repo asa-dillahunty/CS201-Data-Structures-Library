@@ -2,31 +2,14 @@
 using namespace std;
 #include "RBTree.cpp"
 
-void dumpTree(RBTree<string,int> tree) { //true for read, false for write
-
-	cout << "size is : " << tree.size() << endl;
-	cout << "inorder is : " << tree.inorder() << endl;
-	cout << "preorder is : " << tree.preorder() << endl;
-	cout << "Keys in order is : " << tree.keyInOrder() << endl;
-	cout << "Colors: "; tree.printColors();cout << endl;
-}
-
 int main(){
 	string K[10] = {"A","B","C","D","E","F","H","I","J","K"};
 	int V[10] = {10,9,8,7,6,5,4,3,2,1};
 	
-	RBTree<string,int> T1;
-	RBTree<string,int> T2(K,V,10);
-
-	cout << "FML honestly" << endl;
+	RBTree<string,int> T1, T2(K,V,10);
 	
 	for(int i=0; i<10; i++) T1.insert(K[i],V[i]);
 	// T1 and T2 should be identical trees
-
-	cout << "Finished the inserts :)" << endl;
-
-	dumpTree(T2);
-	dumpTree(T1);
 	
 	cout << *(T2.search("C")) << endl;
 	// Should output 8
@@ -38,7 +21,7 @@ int main(){
 	//Should output C 
 	
 	T2.preorder();
-	//Should output D B A C F E I H K J
+	//Should output D B A C I F E H K J
 	
 	T2.inorder();
 	//Should output	A B C D E F H I J K
@@ -55,12 +38,11 @@ int main(){
 	T2.inorder();
 	//Should output	A C D E F H I J K
 	
-	/*
+	
 	RBTree<string,int> L, R;
 	T1.split("G", L, R);
 	cout << R.rank("K") << endl;
 	// Should output 4
-	*/
 	
     RBTree<int,int> X;
 	for (int i=1;i<100000;i++) X.insert(i,i);

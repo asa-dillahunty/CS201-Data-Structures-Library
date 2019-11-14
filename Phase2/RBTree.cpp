@@ -6,59 +6,33 @@
  * This program is written to implement
  * learned algorithms in CS201
  *
- * Red Black Trees implemented are left-leaning
+ * These nodes are used to implement left-leaning
+ * Red Black Trees
  */
 
 #include <iostream>
-#include <string>
 using namespace std;
 
-static bool red = true;
-static bool black = false;
-
-template <class K,class V>
-class RBTree {
+template<typename K,typename V>
+class RBTree
+{
 	private:
-
+		
 		/**
 		 * Struct for the node class
 		 * used in left-leaning red black trees
 		 */
-		struct rbnode {
-			rbnode *left, *right;
+		struct RBNode {
+			RBNode *left, *right;
 			K key;
 			V val;
-			int size;
 			bool color;
+			int size;
 		};
 
-		K trashKey;
-		V trashVal;
 		bool red;
 		bool black;
-		rbnode* root;
-
-
-		/**
-		 * Returns a pointer to a new node
-		 * Mimics a constructor
-		 *
-		 * @param key: key is used for ordering the nodes
-		 * @param val: val is the value stored at each node
-		 * @return: returns a pointer to a new node with key K, value V
-		 */
-		rbnode* newrbnode(K key, V val) {
-
-			rbnode *newnode = new rbnode;
-			newnode->left = NULL;
-			newnode->right = NULL;
-			newnode->key = key;
-			newnode->val = val;
-			newnode->color = red;
-			newnode->size = 1;
-
-			return newnode;
-		}
+		RBNode* root;
 
 		/**
 		 * Returns a pointer to a new node
@@ -66,92 +40,67 @@ class RBTree {
 		 *
 		 * @param key: used for ordering the nodes
 		 * @param val: the value stored at each node
-		 * @param color: the color of the node, used for balancing the nodes
+		 * @param color: the color of the node, used for balancing the nodes (defaults to red)
 		 * @return: returns a pointer to a new node with key K, value V
 		 */
-		rbnode* newrbnode(K key, V val, bool color) {
-			rbnode *newnode = new rbnode;
+		RBNode* newNode(K key, V val, bool color=true) { // color = true is color = red
+			RBNode *newnode = new RBNode;
 			newnode->left = NULL;
 			newnode->right = NULL;
 			newnode->key = key;
 			newnode->val = val;
 			newnode->color = color;
 			newnode->size = 1;
-
 			return newnode;
-
-			//return (newrbnode(key,val)->color = color);
 		}
 
 		/**
-		 * "Rotates" the node h to become the left child of
-		 * its current right child.
-		 *
-		 * @param h: the node to be rotated
-		 * @return: the node on "top" after the rotation.
+		 * Clears the memory?
+		 * Doesn't look like it does anything honestly
+		 * I don't understand structs or pointers.
 		 */
-		rbnode* rotateLeft(rbnode *h) {
+		void clearMemory(RBNode *curr) {
+			if (curr == NULL) return;
 
-			rbnode *x = h->right;
-			h->right = x->left;
-			x->left = h;
-			x->color = x->left->color;
-			x->left->color = red;//impliesx was red
-
-			/***************
-			 * update size *
-			 ***************/
-			h->size = nodeSize(h->left) + nodeSize(h->right) + 1; // h is below x
-			x->size = nodeSize(x->left) + nodeSize(x->right) + 1;
-
-			return x;
+			clearMemory(curr->left);
+			if (curr->left != NULL) free(curr->left);
+			clearMemory(curr->right);
+			if (curr->right != NULL) free(curr->right);
+		}
+		
+		/**
+		 * Returns a pointer to the node's key
+		 * Kind of a pointless function
+		 * 
+		 * @param curr: pointer to the node whose key we want
+		 * @return: returns a pointer to the node's key
+		 */
+		K* getKey(RBNode *curr) {
+			if (curr == NULL) return NULL;
+			return &(curr->key);
 		}
 
 		/**
-		 * "Rotates" the node h to become the right child of
-		 * its current left child.
-		 *
-		 * @param h: the node to be rotated
-		 * @return: the node on "top" after the rotation
+		 * Returns a pointer to the node's value
+		 * Kind of a pointless function
+		 * 
+		 * @param curr: pointer to the node whose value we want
+		 * @return: returns a pointer to the node's value
 		 */
-		rbnode* rotateRight(rbnode *h) {
-
-			rbnode *x = h->left;
-			h->left = x->right;
-			x->right = h;
-			x->color = x->right->color;
-			x->right->color = red;
-
-			/***************
-			 * update size *
-			 ***************/
-			h->size = nodeSize(h->left) + nodeSize(h->right) + 1; // h is below x
-			x->size = nodeSize(x->left) + nodeSize(x->right) + 1;
-
-			return x;
-		}
-
-		/**
-		 * Inverts the colors of the node and its children
-		 *
-		 * @param h: the node to have its color flipped.
-		 */
-		 // does this imply both children exist??
-		void colorFlip(rbnode *h) {
-			h->color = !h->color;
-			h->left->color = !h->left->color;
-			h->right->color = !h->right->color;
+		V* getVal(RBNode *curr) {
+			if (curr == NULL) return NULL;
+			return &(curr->val);
 		}
 
 		/**
 		 * Returns if the node is red or not
 		 *
-		 * @param h: the node whose color is in question
+		 * @param curr: the node whose color is in question
 		 * @return: true if red, false if black
 		 */
-		bool isRed(rbnode *h) {
-			if (h == NULL) return black;
-			else return h->color; //red is true
+		bool isRed(RBNode *curr) {
+			if (curr == NULL) return black;
+			return (curr->color);
 		}
 
 		/**
@@ -159,291 +108,278 @@ class RBTree {
 		 *
 		 * Size is the number of nodes "below" it, plus 1 (itself)
 		 *
-		 * @param h: the node whose size is in question
+		 * @param curr: the node whose size is in question
 		 * @return: the size of the node
 		 */
-		int nodeSize(rbnode *h) {
-			if (h == NULL) return 0;
-			else return h->size; // assume we update this (safe?)
+		int nodeSize(RBNode *curr){
+			if (curr == NULL) return 0;
+			return curr->size;
+		}
+
+		/**
+		 * "Rotates" the node curr to become the left child of
+		 * its current right child.
+		 *
+		 * @param curr: the node to be rotated
+		 * @return: the node on "top" after the rotation.
+		 */
+		RBNode* rotateLeft(RBNode *curr) {
+			RBNode *x = curr->right;
+			curr->right = x->left;
+			x->left = curr;
+			x->color = x->left->color;
+			x->left->color = red; // Implies x was red?
+
+			/** UPDATE SIZE **/
+			curr->size = nodeSize(curr->left) + nodeSize(curr->right) + 1;
+			x->size = nodeSize(x->left) + nodeSize(x->right) + 1;
+			return x;
+		}
+
+		/**
+		 * "Rotates" the node curr to become the right child of
+		 * its current left child.
+		 *
+		 * @param curr: the node to be rotated
+		 * @return: the node on "top" after the rotation
+		 */
+		RBNode* rotateRight(RBNode *curr) {
+			RBNode *x = curr->left;
+			curr->left = x->right;
+			x->right = curr;
+			x->color = x->right->color;
+			x->right->color = red; //Implies x was red?
+
+			/** UPDATE SIZE **/
+			curr->size = nodeSize(curr->left) + nodeSize(curr->right) + 1;
+			x->size = nodeSize(x->left) + nodeSize(x->right) + 1;
+			return x;
+		}
+
+		/**
+		 * Inverts the colors of the node and its children
+		 *
+		 * @param curr: the node to have its color flipped.
+		 */
+		 // does this imply both children exist??
+		void colorFlip(RBNode *curr) {
+			curr->color = !curr->color;
+			curr->left->color = !curr->left->color;
+			curr->right->color = !curr->right->color;
 		}
 
 		/**
 		 * Inserts a node into the branching nodes below
 		 *
-		 * @param h: the current node in the branches being looked at
+		 * @param curr: the current node in the branches being looked at
 		 * @param key: the key of the node to be inserted
 		 * @param val: the value of the node to be inserted
 		 * @return: the updated node on top after the insert
 		 */
-		rbnode* insertNode(rbnode *h, K key, V val) {
+		RBNode* insertNode(RBNode *curr, K key, V val) {
+			if (curr == NULL) return newNode(key, val);
 
-			if (h == NULL) {
-				return newrbnode(key, val);
-			}
+			if (isRed(curr->left) && isRed(curr->right))
+				colorFlip(curr);
 
-			if (isRed(h->left) && isRed(h->right)) colorFlip(h);
+			if (key < curr->key)
+				curr->left = insertNode(curr->left, key, val);
+			else if (key > curr->key)
+				curr->right = insertNode(curr->right, key, val);
+			else if (key == curr->key)
+				curr->val = val;
 
-			if (key < h->key)
-				h->left = insertNode(h->left, key, val);
-			else if (key > h->key)
-				h->right = insertNode(h->right, key, val);
-			else if (key == h->key)
-				h->val = val;
+			if (isRed(curr->right))
+				curr = rotateLeft(curr);
+				
+			if (isRed(curr->left) && isRed(curr->left->left))
+				curr = rotateRight(curr);
 
-			if (isRed(h->right))
-				h = rotateLeft(h);
-
-			if (isRed(h->left) && isRed(h->left->left))
-				h = rotateRight(h);
-
-			/***************
-			 * update size *
-			 ***************/
+			/** UPDATE SIZE **/
 			//why is this necessary when it was just done in the rotates?
 			//it may not rotate
-			h->size = nodeSize(h->left) + nodeSize(h->right) + 1;
-			return h;
+			curr->size = nodeSize(curr->left) + nodeSize(curr->right) + 1;
+			return curr;
 		}
 
 		/**
-		 * Returns a string representation of an in order traversal of the tree
+		 * Prints an in order traversal of the tree
 		 *
-		 * @param h: the current node in the branches being looked at
-		 * @return: a string representation of an in order traversal of the tree
+		 * @param curr: the current node in the branches being looked at
 		 */
-		string printInOrder(rbnode *h) {
-			string output="";
+		void printInOrder(RBNode *curr) {
+			if (curr == NULL) return;
 
-			if (h!=NULL) {
-				output += printInOrder(h->left);
-				output += to_string(h->val) + " ";
-				output += printInOrder(h->right);
-			}
-
-			return output;
+			printInOrder(curr->left);
+			cout << curr->key << " ";
+			printInOrder(curr->right);
 		}
 
 		/**
-		 * Returns a string representation of a post-order traversal of the tree
+		 * Prints a post-order traversal of the tree
 		 *
-		 * @param h: the current node in the branches being looked at
-		 * @return: a string representation of a post-order traversal of the tree
+		 * @param curr: the current node in the branches being looked at
 		 */
-		string printPostOrder(rbnode *h) {
-			string output="";
+		void printPostOrder(RBNode *curr) {
+			if (curr == NULL) return;
 
-			if (h!=NULL) {
-				output += printPostOrder(h->left);
-				output += printPostOrder(h->right);
-				output += to_string(h->val) + " ";
-			}
-
-			return output;
+			printPostOrder(curr->left);
+			printPostOrder(curr->right);
+			cout << curr->key << " ";
 		}
 
 		/**
-		 * Returns a string representation of a pre-order traversal of the tree
+		 * Prints a pre-order traversal of the tree
 		 *
-		 * @param h: the current node in the branches being looked at
-		 * @return: a string representation of a pre-order traversal of the tree
+		 * @param curr: the current node in the branches being looked at
 		 */
-		string printPreOrder(rbnode *h) {
-			string output="";
+		void printPreOrder(RBNode *curr) {
+			if (curr == NULL) return;
 
-			if (h!=NULL) {
-				output += to_string(h->val) + " ";
-				output += printPreOrder(h->left);
-				output += printPreOrder(h->right);
-			}
-
-			return output;
-		}
-
-		string printKeyInOrder(rbnode *h) {
-			string output="";
-
-			if (h!=NULL) {
-				output += printKeyInOrder(h->left);
-				output += h->key + " ";
-				output += printKeyInOrder(h->right);
-			}
-
-			return output;
+			cout << curr->key << " ";
+			printPreOrder(curr->left);
+			printPreOrder(curr->right);
 		}
 
 		/**
 		 * Prints a pre-order traversal of the tree with colors listed beside values
 		 *
-		 * @param h: the current node in the branches being looked at
+		 * @param curr: the current node in the branches being looked at
 		 */
-		void printColors(rbnode *h) {
-			if (h == NULL) return;
+		void printColors(RBNode *curr) {
+			if (curr == NULL) return;
 
-			if (h->color) cout << h->val << ": Red" << endl;
-			else cout << h->val << ": Black" << endl;
-
-			printColors(h->left);
-			printColors(h->right);
+			if (curr->color) cout << curr->val << ": Red" << endl;
+			else cout << curr->val << ": Black" << endl;
+			printColors(curr->left);
+			printColors(curr->right);
 		}
 
-		rbnode* fixUp(rbnode *h) {
-			if (isRed(h->right))
-				h = rotateLeft(h);
+		
+		RBNode* fixUp(RBNode *curr) {
+			if (isRed(curr->right))
+				curr = rotateLeft(curr);
 
-			if (isRed(h->left) && isRed(h->left->left))
-				h = rotateRight(h);
+			if (isRed(curr->left) && isRed(curr->left->left))
+				curr = rotateRight(curr);
 
-			if (isRed(h->left) && isRed(h->right))
-				colorFlip(h);
+			if (isRed(curr->left) && isRed(curr->right))
+				colorFlip(curr);
 
-			/***************
-			 * update size *
-			 ***************/
-			h->size = nodeSize(h->left) + nodeSize(h->right) + 1;
-
-			return h;
+			/** UPDATE SIZE **/
+			curr->size = nodeSize(curr->left) + nodeSize(curr->right) + 1;
+			return curr;
 		}
 
-		rbnode* moveRedRight(rbnode *h) {
-			colorFlip(h);
-
-			if (isRed(h->left->left)) {
-				h = rotateRight(h);
-				colorFlip(h);
+		
+		RBNode* moveRedRight(RBNode *curr) {
+			colorFlip(curr);
+			if (isRed(curr->left->left)) {
+				curr = rotateRight(curr);
+				colorFlip(curr);
 			}
-
-			return h;
+			return curr;
 		}
 
-		rbnode* moveRedLeft(rbnode *h) {
-			colorFlip(h);
-
-			if (isRed(h->right->left)) {
-				h->right = rotateRight(h->right);
-				h = rotateLeft(h);
-				colorFlip(h);
+		
+		RBNode* moveRedLeft(RBNode *curr) {
+			colorFlip(curr);
+			if (isRed(curr->right->left)) {
+				curr->right = rotateRight(curr->right);
+				curr = rotateLeft(curr);
+				colorFlip(curr);
 			}
-
-			return h;
+			return curr;
 		}
 
 		/**
 		 * Deletes the smallest key value in the tree
 		 *
-		 * @param h: the node currently being looked at in the tree
+		 * @param curr: the node currently being looked at in the tree
 		 * @return: the node on top after the deletion
 		 */
-		rbnode* deleteMin(rbnode *h) {
-			if (h->left == NULL) return NULL; // do we not care about right? //free memory?
+		RBNode* deleteMin(RBNode *curr) {
+			if (curr->left == NULL)
+				return NULL;
 
-			if (!isRed(h->left) && !isRed(h->left->left))
-				h = moveRedLeft(h);
+			if (!isRed(curr->left) && !isRed(curr->left->left))
+				curr = moveRedLeft(curr);
 
-			h->left = deleteMin(h->left);
-
-			return fixUp(h);
+			curr->left = deleteMin(curr->left);
+			return fixUp(curr);
 		}
 
 		/**
 		 * Removes the node with key value "key" from the tree
 		 *
-		 * @param h: the node currently being looked at in the tree
+		 * @param curr: the node currently being looked at in the tree
 		 * @param key: the key value of the node to be deleted
 		 * @return: returns the node on top after the deletion
 		 */
-		rbnode* removeNode(rbnode *h, K key) {
-			if (key < h->key) {
-				if (!isRed(h->left) && !isRed(h->left->left))
-					h = moveRedLeft(h);
-				h->left = removeNode(h->left, key);
+		RBNode* removeNode(RBNode *curr, K key) {
+			if (key < curr->key) {
+				if (!isRed(curr->left) && !isRed(curr->left->left))
+					curr = moveRedLeft(curr);
+
+				curr->left = removeNode(curr->left, key);
 			}
 			else {
 				// leanRight() in sedgewick
-				if (isRed(h->left))
-				h = rotateRight(h);
+				if (isRed(curr->left))
+					curr = rotateRight(curr);
 
-				if (key == h->key && h->right == NULL) {
+				if (key == curr->key && curr->right == NULL) {
 					return NULL;
 				}
 
-				if (!isRed(h->right) && !isRed(h->right->left))
-					h = moveRedRight(h);
+				if (!isRed(curr->right) && !isRed(curr->right->left))
+					curr = moveRedRight(curr);
 
-				if (key == h->key) {
-					rbnode *x = h->right;
-					while (x->left != NULL)
-						x = x->left;
+				if (key == curr->key) {
+					RBNode *x = curr->right;
 
-					h->key = x->key;
-					h->val = x->val;
-					h->right = deleteMin(h->right);
+					while (x->left != NULL) x = x->left; // get sucessor
+
+					curr->key = x->key;
+					curr->val = x->val;
+					curr->right = deleteMin(curr->right); // essentially removeNode(curr->right, curr->key);
 				}
 				else {
-					h->right = removeNode(h->right, key);
+					curr->right = removeNode(curr->right, key);
 				}
 			}
 
-			/***************
-			 * update size *
-			 ***************/
-			//h->size = nodeSize(h->left) + nodeSize(h->right) + 1;
-
-			return fixUp(h);
-		}
-
-		/**
-		 * Clears the memory?
-		 * Doesn't look like it does anything honestly
-		 * I don't understand structs.
-		 */
-		void clearMemory(rbnode *h) {
-			if (h == NULL) return;
-			clearMemory(h->left);
-			clearMemory(h->right);
-			free(h);
+			//fixUp fixes size
+			return fixUp(curr);
 		}
 
 		/**
 		 * Creates a deep copy of the node
 		 *
-		 * @param h: the node being copied
+		 * @param curr: the node being copied
 		 * @return: the copy of the node
 		 */
-		rbnode* copy(rbnode *h) {
-			rbnode *newnode = newrbnode(h->key, h->val, h->color);
-			if (h->right!=NULL) newnode->right = copy(h->right);
-			if (h->left!=NULL) newnode->left = copy(h->left);
-			newnode->size = h->size;
-
+		RBNode* copy(RBNode *curr) {
+			RBNode* newnode = newNode(curr->key,curr->val,curr->color);
+			if (curr->left != NULL) newnode->left = copy(curr->left);
+			if (curr->right != NULL) newnode->right = copy(curr->right);
+			newnode->size = curr->size;
 			return newnode;
 		}
 
 		/**
 		 * Finds the value of a node with the specified key, k
 		 *
-		 * @param h: the node currently being looked at
+		 * @param curr: the node currently being looked at
 		 * @param k: the key of the node being searched for
 		 * @return: returns the value stored in the node with key value k
 		 */
-		V* findVal(rbnode *h, K key) {
-			cout << "key: " << key << " h->key: " << h->key << endl;
-			if (h == NULL) return NULL;
-			else if (key == h->key) {
-				cout << "found key" << endl;
-				return &h->val;
-			}
-			else if (key > h->key) {
-				cout << "go right" << endl;
-				return findVal(h->right, key);
-			}
-			else if (key < h->key) {
-				cout << "go left" << endl;
-				return findVal(h->left, key);
-			}
-			else {
-				cout << "foudn the key" << endl;
-				return &h->val;
-			}
+		V* findVal(RBNode *curr, K key) {
+			if (curr == NULL) return NULL;
+			else if (curr->key == key) return &(curr->val);
+			else if (key > curr->key) return findVal(curr->right, key);
+			else if (key < curr->key) return findVal(curr->left, key);
+			return NULL;
 		}
 
 		/**
@@ -451,35 +387,18 @@ class RBTree {
 		 *
 		 * Rank is something I don't understand at the moment
 		 *
-		 * @param h: the current node being looked at
+		 * @param curr: the current node being looked at
 		 * @return: the rank of the node;
 		 */
-		int getRank(rbnode *h, K key, bool found=false) {
-			if (h == NULL) return 0;
-
-			if (found)
-				if (h->color) return getRank(h->right,key,found);// right path should be shorter
-				else return getRank(h->right,key,found)+1;
-
-			else if (h->key == key)
-				if (h->color) return getRank(h->right,key,!found);// right path should be shorter
-				else return getRank(h->right,key,!found)+1;
-
-			else if (h->key > key) //go right
-				return getRank(h->right,key,found);
-
-			else return getRank(h->left,key,found);
+		int getRank(RBNode *curr, K key) {
+			if (curr==NULL) return 0;
+			else if (key > curr->key) return nodeSize(curr->left) + 1 + getRank(curr->right, key);
+			else if (key < curr->key) return getRank(curr->left, key);
+			else if (key == curr->key) return curr->size - nodeSize(curr->right);
+			else return 0;
 		}
-
-		V getVal(rbnode *h) {
-			if (h == NULL) {
-				V val;
-				return val;
-			}
-			else return h->val;
-		}
-
-		K getPositionNode(rbnode *h, int k) {
+		
+		K getPos(RBNode *curr, int k) {
 			//get node at position k?? yeah
 			/*
 			say I am the root, my size is 17, left is 8 and right is 8,
@@ -490,20 +409,18 @@ class RBTree {
 
 			if I'm looking for 3, I tell left I'm looking for 3
 			*/
-			if (h == NULL) return trashKey;
-			int order = nodeSize(h->left) + 1;
-
-			if (k == order) return h->key;
-			else if (k < order) return getPositionNode(h->left, k);
-			else return getPositionNode(h->right, k - order);
+			int place = nodeSize(curr->left) + 1;
+			if (k == place) return curr->key;
+			else if (k < place) return getPos(curr->left, k);
+			else return getPos(curr->right, k - place);
 		}
 
-		int rankNode(rbnode *h, K key) {
-			if (h==NULL) return 0;
-			else if (key > h->key) return rankNode(h->right, key);
-			else if (key < h->key) return rankNode(h->left, key);
-			else if (key == h->key) return h->size - nodeSize(h->right);
-			else return 0;
+		RBNode* findNode(RBNode* curr, K key) {
+			if (curr == NULL) return NULL;
+			else if (key == curr->key) return curr;
+			else if (key > curr->key) return findNode(curr->right, key);
+			else if (key < curr->key) return findNode(curr->left, key);
+			else return NULL;
 		}
 
 		/******************************************************************************
@@ -513,119 +430,109 @@ class RBTree {
 	public:
 
 		RBTree() {
-			this->root = NULL;
-			//this->trashKey = (K) NULL; Why does this throw errors
-			//this->trashVal = (V) NULL;
-			this->red = true;
-			this->black = false;
+			root = NULL;
+			red = true;
+			black = false;
 		}
 
 		RBTree(K k[], V v[], int s) {
-			this->root = NULL;
-			this->red = true;
-			this->black = false;
-
-			for (int i = 0; i < s; i++) {
-				this->root = insertNode(this->root, k[i], v[i]);
-			}
-    	}
-
-		/*
-		RBTree(K *k[], int v[], int s) {
 			root = NULL;
+			red = true;
+			black = false;
+
 			for (int i = 0; i < s; i++) {
-			root = insert(root, k[i], v[i]);
-			if (root->color)
+				root = insertNode(root, k[i], v[i]);
 				root->color = black;
-			cout << "Insert #" << i+1 << endl;
-			cout << "Inorder: ";
-			inorder();
-			cout << endl << "Preorder: ";
-			preorder();
-			cout << endl;
-			printColors(root);
 			}
-			treeSize = s;
 		}
-		*/
+
+		RBTree(RBNode* root) {
+			this->root = root;
+			this->root->color = black;
+			red = true;
+			black = false;
+		}
 
 		~RBTree() {
-			clearMemory(this->root);
+			clearMemory(root);
+			free(root);
 		}
 
-		/*
 		RBTree(const RBTree &other) {
-			treeSize = other.treeSize;
-			root = new node;
-			root->key = other.root->key;
-			root->val = other.root->val;
-			root->color = other.root->color;
-			copy(root, other.root);
+			root = copy(other.root);
 		}
-		*/
-		/*
+
 		RBTree& operator=(const RBTree& other) {
-			if (this != &other) {
-				treeSize = other.treeSize;
-				root = new node;
-				root->key = other.root->key;
-				root->val = other.root->val;
-				root->color = other.root->color;
-				copy(root, other.root);
-			}
+			root = copy(other.root);
 			return *this;
 		}
-		*/
 
-		V* search(K key) {
-			return findVal(root,key);
+		void setRoot(RBNode* root) {
+			this->root = root;
 		}
 
 		void insert(K k, V v) {
-			this->root = insertNode(root, k, v);
-			this->root->color=black;
+			root = insertNode(root, k, v);
+			root->color = black;
 		}
 
 		int remove(K k) {
-			int s = nodeSize(this->root);
-			this->root = removeNode(this->root, k);
+			if (search(k) == NULL) return 0;
 
-			return s-nodeSize(this->root);// does below, but clever
+			int s = nodeSize(root);
+			root = removeNode(root, k);
+
+			return s - nodeSize(root); // Better than below?
 			/*
 			if (nodeSize(this->root) != s) return 1;
 			else return 0;
 			*/
 		}
 
+		V* search(K key) {
+			return findVal(root, key);
+		}
+
+		int rank(K k) {
+			return getRank(root, k);
+		}
+
+		K select(int pos) {
+			if (pos > nodeSize(root) || pos < 1) {
+				cout << "Error: param should be between 1 and the size of the tree." << endl;
+				K error;
+				return error;
+			}
+			return getPos(root, pos);
+		}
+
 		int size() {
-			return nodeSize(this->root);
+			return nodeSize(root);
 		}
 
-		string preorder() {
-			return printPreOrder(root);
+		void preorder() {
+			printPreOrder(root);
+			cout << endl;
 		}
 
-		string inorder() {
-			return printInOrder(root);
+		void inorder() {
+			printInOrder(root);
+			cout << endl;
 		}
 
-		string postorder() {
-			return printPostOrder(root);
+		void postorder() {
+			printPostOrder(root);
+			cout << endl;
 		}
 
-		void printColors() {
-			printColors(this->root);
+		void printTree() {
+			printColors(root);
 		}
 
-		string keyInOrder() {
-			return printKeyInOrder(root);
-		}
-
-		K select(int k) {
-			return getPositionNode(root,k);
-		}
-
-		V rank(K k) {
-			return rankNode(root,k);
+		/**
+		 * I have no idea how this is supposed to work
+		 */
+		void split(K key, RBTree& T1, RBTree& T2) {
+			
 		}
 };

@@ -690,16 +690,11 @@ class CircularDynamicArray {
 			}
 			std::cout << std::endl;
 		}
-<<<<<<< HEAD:CircularDynamicArray.cpp
-
-        void randomize() {
-=======
     
         /**
 		 * Bogo sorts the CDA, but without the check to see if it's sorted
 		 */
 		void randomize() {
->>>>>>> a573c9f675b088f705d8a76acbfccc667d4819f2:Phase1/CircularDynamicArray.cpp
             T swap;
             int a,b;
             for (int i=0;i<this->size;i++) {

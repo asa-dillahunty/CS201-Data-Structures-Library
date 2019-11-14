@@ -10,19 +10,19 @@ using namespace std;
 void dumpTree(RBTree<int,int> *tree) { //true for read, false for write
 
 	cout << "size is : " << tree->size() << endl;
-	cout << "inorder is : " << tree->inorder() << endl;
-	cout << "preorder is : " << tree->preorder() << endl;
+	cout << "inorder is : "; tree->inorder();
+	cout << "preorder is : "; tree->preorder();
 }
 
 void dumpTree(RBTree<int,int> *tree, string filename, bool cat) { //cat:=> concatenate
 	ofstream out;
 
-	if (cat) out.open(filename,ios::app);
+	if (cat) out.open(filename,ios::app); //ios::app ???????
 	else out.open(filename);
 
 	out << "size is : " << tree->size() << endl;
-	out << "inorder is : " << tree->inorder() << endl;
-	out << "preorder is : " << tree->preorder() << endl;
+	out << "inorder is : "; tree->inorder(); out << endl;
+	out << "preorder is : "; tree->preorder(); out << endl;
 }
 
 bool insertTest(string filename, bool rw) {
@@ -54,7 +54,7 @@ int main() {
 	int s=10;
 	for (int i=0;i<10;i++) {
 		if (tree->size() != s) cout << "Sux" << endl;
-		tree->remove(i);
+		if (tree->remove(i) != 1) cout << "Sux" << endl;;
 		s--;
 		if (tree->size() != s) cout << "Sux" << endl;
 	}
