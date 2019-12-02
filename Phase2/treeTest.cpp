@@ -17,7 +17,7 @@ void dumpTree(RBTree<int,int> *tree) { //true for read, false for write
 void dumpTree(RBTree<int,int> *tree, string filename, bool cat) { //cat:=> concatenate
 	ofstream out;
 
-	if (cat) out.open(filename,ios::app); //ios::app ???????
+	if (cat) out.open(filename,ios::app); //ios::app ??????? ios append? ios??
 	else out.open(filename);
 
 	out << "size is : " << tree->size() << endl;
