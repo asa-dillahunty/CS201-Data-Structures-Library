@@ -5,7 +5,7 @@
 using namespace std;
 
 template <class T>
-class CircularDynamicArray {
+class CDA {
 	private:
 		int size;
 		int cap;
@@ -14,14 +14,14 @@ class CircularDynamicArray {
 		T error;
 
 	public:
-		CircularDynamicArray() {
+		CDA() {
 			size = 0;
 			cap = 2;
 			head = 0;
 			list = new T[cap];
 		}
 
-		CircularDynamicArray(int s) {
+		CDA(int s) {
 			if (s < 1) {
 				cout << "Size must be 1 or greater" << endl;
 			}
@@ -33,7 +33,7 @@ class CircularDynamicArray {
 			}
 		}
 
-		CircularDynamicArray(const CircularDynamicArray &other) {
+		CDA(const CDA &other) {
 			size = other.size;
 			cap = other.cap;
 			head = other.head;
@@ -45,7 +45,7 @@ class CircularDynamicArray {
 			list = newList;
 		}
 
-		CircularDynamicArray& operator=(const CircularDynamicArray& other) {
+		CDA& operator=(const CDA& other) {
 			if (this != &other) {
 				size = other.size;
 				cap = other.cap;
@@ -60,7 +60,7 @@ class CircularDynamicArray {
 			return *this;
 		}
 
-		~CircularDynamicArray() {
+		~CDA() {
 			delete[] list;
 		}
 
@@ -80,9 +80,9 @@ class CircularDynamicArray {
 		}
 
 		void swap(T *a, T *b) {
-	    T temp = *a;
-	    *a = *b;
-	    *b = temp;
+			T temp = *a;
+			*a = *b;
+			*b = temp;
 		}
 
 		void printArray(){
@@ -112,7 +112,7 @@ class CircularDynamicArray {
 				head = 0;
 			}
 			else {
-			list[(head+size)%cap] = v;
+				list[(head+size)%cap] = v;
 			}
 			size++;
 		}

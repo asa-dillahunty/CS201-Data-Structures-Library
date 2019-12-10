@@ -1,5 +1,5 @@
 all:
-	g++ -o heaptest heaptest.cpp
+	g++ -o phase3 201MainPhase3.cpp
 
 clean:
-	rm heaptest
+	rm phase3
