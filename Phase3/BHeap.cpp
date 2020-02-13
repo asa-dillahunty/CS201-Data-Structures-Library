@@ -8,8 +8,13 @@
  *
  * It's a binomial heap
  */
-#include <iostream>
+
+#ifndef Included_CDA
+#define Included_CDA
 #include "CDA.cpp"
+#endif
+
+#include <iostream>
 using namespace std;
 
 template<class K,class V>
@@ -151,7 +156,7 @@ class BHeap {
 			return minn;
 		}
 
-			V peakValue() {
+		V peakValue() {
 			bool minStarted = false;
 			K minn;
 			V minnVal;
@@ -232,40 +237,45 @@ class BHeap {
 		}
 
 		K extractMin() {
-		bool minStarted = false;
-		K minn;
-		int minnIndex = 0;
-		for (int i = 0; i < BinHeap.length(); i++) {
-			if (BinHeap[i] == NULL) continue;
-			if (!minStarted) {
-				minn = BinHeap[i]->key;
-				minnIndex = i;
-			}
-			else if (BinHeap[i]->key < minn) {
-				minn = BinHeap[i]->key;
-				minnIndex = i;
-			}
-		}
-		if (minnIndex != 0) {
-			CDA<node*> tempCDA(BinHeap[minnIndex]->degree);
-			node *start = BinHeap[minnIndex]->child;
-			tempCDA[BinHeap[minnIndex]->degree - 1] = start;
-			int k = BinHeap[minnIndex]->degree - 2;
+			bool minStarted = false;
+			K minn;
+			int minnIndex = 0;
 
-			while (start->sibling != NULL) {
-				start = start->sibling;
-				tempCDA[k] = start;
-				k--;
+			for (int i = 0; i < BinHeap.length(); i++) {
+				if (BinHeap[i] == NULL) continue;
+				if (!minStarted) {
+					minn = BinHeap[i]->key;
+					minnIndex = i;
+				}
+				else if (BinHeap[i]->key < minn) {
+					minn = BinHeap[i]->key;
+					minnIndex = i;
+				}
 			}
-			for (int i = 0; i < tempCDA.length(); i++) {
-				tempCDA[i]->sibling = NULL;
-			}
-			BinHeap[minnIndex] = NULL;
-			BHeap temp(tempCDA);
-			merge(temp);
-		}
-		else
+
+			if (minnIndex != 0) {
+				CDA<node*> tempCDA(BinHeap[minnIndex]->degree);
+				node *start = BinHeap[minnIndex]->child;
+				tempCDA[BinHeap[minnIndex]->degree - 1] = start;
+				int k = BinHeap[minnIndex]->degree - 2;
+
+				while (start->sibling != NULL) {
+					start = start->sibling;
+					tempCDA[k] = start;
+					k--;
+				}
+
+				for (int i = 0; i < tempCDA.length(); i++) {
+					tempCDA[i]->sibling = NULL;
+				}
+				
 				BinHeap[minnIndex] = NULL;
+				BHeap temp(tempCDA);
+				merge(temp);
+			}
+			else BinHeap[minnIndex] = NULL;
+
+
 			return minn;
 		}
 

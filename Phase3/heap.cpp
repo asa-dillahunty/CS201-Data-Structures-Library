@@ -8,8 +8,13 @@
  *
  * It's a heap
  */
+
+#ifndef Included_CDA
+#define Included_CDA
+#include "CDA.cpp"
+#endif
+
 #include <iostream>
-#include "CircularDynamicArray.cpp"
 using namespace std;
 
 template<class K,class V>
@@ -21,7 +26,7 @@ class Heap {
 		V val;
 	};
 
-	CircularDynamicArray<node> minHeap;
+	CDA<node> minHeap;
 
 	void swap(node &a, node &b) {
 		node temp = a;
@@ -62,7 +67,7 @@ class Heap {
 
   public:
 	Heap() {
-		minHeap = CircularDynamicArray<node> ();
+		minHeap = CDA<node> ();
 	}
 
 	Heap(K k[], V v[], int s) {
@@ -78,7 +83,7 @@ class Heap {
 			heapify(list, s, i);
 		}
 
-		minHeap = CircularDynamicArray<node> ();
+		minHeap = CDA<node> ();
 		for (int i = 0; i < s; i++) {
 			minHeap.addEnd(list[i]);
 		}

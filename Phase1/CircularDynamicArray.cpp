@@ -620,12 +620,6 @@ class CircularDynamicArray {
 			int comp=base-1;
 			bool valid=1;
 			//while something
-<<<<<<< HEAD:CircularDynamicArray.cpp
-
-            for (int i=0;valid;i++) {
-                valid=countingSort(base,comp, i);
-            }
-=======
             
             //He just wants the first k bits
 			
@@ -635,7 +629,6 @@ class CircularDynamicArray {
 			
 
 			countingSort(base,comp,0);
->>>>>>> a573c9f675b088f705d8a76acbfccc667d4819f2:Phase1/CircularDynamicArray.cpp
 		}
 
 		/**
