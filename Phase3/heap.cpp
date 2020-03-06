@@ -6,7 +6,7 @@
  * This program is written to implement
  * learned algorithms in CS201
  *
- * It's a heap
+ * It's a minimum binary heap
  */
 
 #ifndef Included_CDA
@@ -49,18 +49,35 @@ class Heap {
 		}
 	}
 
+	//if parent smaller, swap
 	void fixUp(int index) {
-		//if parent smaller, swap
 		int parent = (index-1)/2;
 
 		//if parent == index this will not be called, no worries
-		if (minHeap[parent].key < minHeap[index].key) { //swap
-			node swap = minHeap[parent];
-			minHeap[parent] = minHeap[index];
-			minHeap[index] = swap;
+		if (minHeap[parent].key > minHeap[index].key) { //swap
+			swap(minHeap[parent],minHeap[index]);
 
 			//check if still broke
 			fixUp(parent);
+		}
+	}
+
+	void fixDown(int parent) {
+		int size = minHeap.length();
+		int lChild = parent*2 + 1;
+		int rChild = lChild + 1;
+		int minChild = lChild;
+
+		//out of bounds
+		if (lChild >= size) return;
+
+		// rchild < size assures not out of bounds
+		if (rChild < size && minHeap[lChild].key > minHeap[rChild].key) minChild = rChild;
+		//else it alread = lchild
+
+		if (minHeap[parent].key > minHeap[minChild].key) {
+			swap(minHeap[parent],minHeap[minChild]);
+			fixDown(minChild);
 		}
 	}
 	
@@ -101,31 +118,16 @@ class Heap {
 	}
 
 	K extractMin() {
-			K key = minHeap[0].key;
+		K key = minHeap[0].key;
 
-			//check both kids
-			int index = 0;
-			int size = minHeap.length() - 1; // to fix index + 1
-			while(index < size) {
-				if (minHeap[index].key < minHeap[index+1].key) { //index becomes new parent
-					minHeap[(index-1)/2] = minHeap[index];
-					//index = next index
-					index = index*2 + 1;
-				}
-				else {
-					minHeap[(index-1)/2] = minHeap[index + 1];
-					index = (index + 1)*2 + 1;
-				}
-				//what if index+1 !< size
-			}
+		int size = minHeap.length() - 1;
+		swap(minHeap[0],minHeap[size]);
+		minHeap.delEnd();
 
-			index = (index-1)/2; //go back to parent
-			minHeap[index] = minHeap[size]; // size is size - 1
-			fixUp(index);
+		fixDown(0);
 
-			minHeap.delEnd();
-			return key;
-		}
+		return key;
+	}
 
 	void insert(K key, V value) {
 		node *newnode = new node;
